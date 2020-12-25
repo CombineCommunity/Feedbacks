@@ -5,26 +5,17 @@
 //  Created by Thibault Wittemberg on 2020-12-23.
 //
 
-public protocol StateMachineDefinition: Transitions {
-    @TransitionsBuilder var transitions: [Transitions] { get }
-}
-
-public struct StateMachine: StateMachineDefinition {
-    public let transitions: [Transitions]
+public struct StateMachine: Transitions {
+    public let entries: [TransitionId: (State, Event) -> State]
 
     public init(@TransitionsBuilder _ transitions: () -> [Transitions]) {
-        self.transitions = transitions()
+        self.entries = transitions().reduce(into: [TransitionId: (State, Event) -> State]()) { accumulator, transition in
+            accumulator.merge(transition.entries, uniquingKeysWith: { $1 })
+        }
     }
 }
 
-public extension StateMachineDefinition {
-    var entries: [TransitionId: (State, Event) -> State] {
-        self.transitions.reduce([TransitionId: (State, Event) -> State](),
-                                { accumulator, transition -> [TransitionId: (State, Event) -> State] in
-                                    accumulator.merging(transition.entries, uniquingKeysWith: { $1 })
-                                })
-    }
-
+public extension StateMachine {
     var reducer: (State, Event) -> State {
         let entries = self.entries
 
