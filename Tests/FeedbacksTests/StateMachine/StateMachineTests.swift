@@ -17,7 +17,7 @@ private struct AnotherMockEvent: Event {}
 final class StateMachineTests: XCTestCase {
     func testEntries_merge_entries_from_composing_transitions() {
         // Given: a StateMachine with some transitions
-        struct MockStateMachine: StateMachine {
+        struct MockStateMachine: StateMachineDefinition {
             let transitionA = Transition(from: MockState.self, on: MockEvent.self, then: MockState(value: 1))
             let transitionB = Transition(from: AnotherMockState.self, on: AnotherMockEvent.self, then: MockState(value: 2))
 
@@ -39,17 +39,13 @@ final class StateMachineTests: XCTestCase {
 
     func testEntries_merge_entries_from_composing_transitions_using_the_second_transition_when_ids_are_equal() {
         // Given: a StateMachine with 2 transitions having the same ids
-        struct MockStateMachine: StateMachine {
-            let transitionA = Transition(from: MockState.self, on: MockEvent.self, then: MockState(value: 1))
-            let transitionB = Transition(from: MockState.self, on: MockEvent.self, then: MockState(value: 1701))
+        let transitionA = Transition(from: MockState.self, on: MockEvent.self, then: MockState(value: 1))
+        let transitionB = Transition(from: MockState.self, on: MockEvent.self, then: MockState(value: 1701))
 
-            var transitions: [Transitions] {
-                transitionA
-                transitionB
-            }
+        let sut = StateMachine {
+            transitionA
+            transitionB
         }
-
-        let sut = MockStateMachine()
 
         // When: getting the state machine's entries
         let receivedEntries = sut.entries
@@ -66,16 +62,21 @@ final class StateMachineTests: XCTestCase {
 
     func testReducer_handle_the_combination_of_registered_and_not_registered_states_and_events() {
         // Given: a state machine that handles registered states and events and also any states and any events
-        struct MockStateMachine: StateMachine {
-            var transitions: [Transitions] {
-                Transition(from: MockState.self, on: MockEvent.self, then: MockState(value: 1))
-                Transition(from: MockState.self, on: AnyEvent.self, then: MockState(value: 2))
-                Transition(from: AnyState.self, on: MockEvent.self, then: MockState(value: 3))
-                Transition(from: AnyState.self, on: AnyEvent.self, then: MockState(value: 4))
-            }
+
+        let mockStateMachine = StateMachine {
+            Transition(from: MockState.self, on: MockEvent.self, then: MockState(value: 1))
+            Transition(from: MockState.self, on: AnyEvent.self, then: MockState(value: 2))
         }
 
-        let sut = MockStateMachine()
+        let anyStateMachine = StateMachine {
+            Transition(from: AnyState.self, on: MockEvent.self, then: MockState(value: 3))
+            Transition(from: AnyState.self, on: AnyEvent.self, then: MockState(value: 4))
+        }
+
+        let sut = StateMachine {
+            mockStateMachine
+            anyStateMachine
+        }
 
         // When: getting its reducer and giving it all the combinations are registers / not registered states and events
         let receivedReducer = sut.reducer
@@ -94,13 +95,9 @@ final class StateMachineTests: XCTestCase {
 
     func testReducer_handle_the_combination_of_registered_and_not_registered_states_and_events2() {
         // Given: a state machine that only handles registered states and events (no any states and any events)
-        struct MockStateMachine: StateMachine {
-            var transitions: [Transitions] {
-                Transition(from: MockState.self, on: MockEvent.self, then: MockState(value: 1))
-            }
+        let sut = StateMachine {
+            Transition(from: MockState.self, on: MockEvent.self, then: MockState(value: 1))
         }
-
-        let sut = MockStateMachine()
 
         // When: getting its reducer and giving it unregistered state and event
         let receivedReducer = sut.reducer
