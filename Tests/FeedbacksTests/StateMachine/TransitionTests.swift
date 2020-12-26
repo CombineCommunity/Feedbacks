@@ -96,15 +96,15 @@ final class TransitionTests: XCTestCase {
 }
 
 extension TransitionTests {
-    func testBuildBlock_build_array_of_transitions_with_variadicParamterOfTransitions() {
-        // Given: 2 transitions
+    func testEquality() {
+        // Given: 3 transitions
         let transitionA = Transition(from: MockState.self, on: MockEvent.self, then: MockState(value: 1))
         let transitionB = Transition(from: AnotherMockState.self, on: AnotherMockEvent.self, then: MockState(value: 2))
+        let transitionC = Transition(from: MockState.self, on: MockEvent.self, then: MockState(value: 2))
 
-        // When: making an array of transitions thanks to the ResultBuilder
-        let receivedTransitions = TransitionsBuilder.buildBlock(transitionA, transitionB)
-
-        // Then: the array of transitions is composed of the input transitions
-        XCTAssertEqual(receivedTransitions as? [Transition], [transitionA, transitionB])
+        // When: comparing them for their equality
+        // Then: A == C and A != B
+        XCTAssertEqual(transitionA, transitionC)
+        XCTAssertNotEqual(transitionA, transitionB)
     }
 }
