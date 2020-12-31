@@ -17,20 +17,16 @@ private struct AnotherMockEvent: Event {}
 final class StateMachineTests: XCTestCase {
     func testEntries_merge_entries_from_composing_transitions() {
         // Given: a StateMachine with some transitions
-        struct MockStateMachine: StateMachineDefinition {
-            let transitionA = Transition(from: MockState.self, on: MockEvent.self, then: MockState(value: 1))
-            let transitionB = Transition(from: AnotherMockState.self, on: AnotherMockEvent.self, then: MockState(value: 2))
+        let transitionA = Transition(from: MockState.self, on: MockEvent.self, then: MockState(value: 1))
+        let transitionB = Transition(from: AnotherMockState.self, on: AnotherMockEvent.self, then: MockState(value: 2))
 
-            var transitions: [Transitions] {
-                transitionA
-                transitionB
-            }
+        let sut = StateMachine {
+            transitionA
+            transitionB
         }
 
-        let sut = MockStateMachine()
-
         // When: getting the state machine's entries
-        let expectedEntries = sut.transitionA.entries.merging(sut.transitionB.entries, uniquingKeysWith: { $1 })
+        let expectedEntries = transitionA.entries.merging(transitionB.entries, uniquingKeysWith: { $1 })
         let receivedEntries = sut.entries
 
         // Then: they are equal to the merging of its composing transitions
