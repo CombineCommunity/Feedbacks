@@ -17,6 +17,7 @@ public struct TransitionId: Hashable {
 
 public protocol Transitions {
     var entries: [TransitionId: (State, Event) -> State] { get }
+    func disable(_ disabled: @escaping () -> Bool) -> Self
 }
 
 @_functionBuilder
