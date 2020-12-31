@@ -93,6 +93,37 @@ final class TransitionTests: XCTestCase {
         // Then: the transition's reducer returns the expected state
         XCTAssertEqual(receivedState as? MockState, expectedState)
     }
+    
+    func testDisable_dynamically_disable_the_transition() {
+        var isDisabled = true
+        
+        // Given: a transition that is disabled when isDisabled is true
+        let sut = Transition(from: MockState.self, on: MockEvent.self, then: AnotherMockState(value: 1))
+            .disable { isDisabled }
+        
+        let reducer = sut.entries.first!.value
+        
+        // When: executing its associated reducer when isDisabled is true
+        let inputState1 = MockState(value: Int.random(in: 0...1_000_000))
+        let newState1 = reducer(inputState1, MockEvent())
+        // Then: the newState1 is the one from the input
+        XCTAssertEqual(newState1 as? MockState, inputState1)
+        
+        isDisabled = false
+        
+        // When: executing its associated reducer when isDisabled is false
+        let newState2 = reducer(MockState(value: 1), MockEvent())
+        // Then: the newState2 is the one declared in the transition
+        XCTAssertEqual(newState2 as? AnotherMockState, AnotherMockState(value: 1))
+        
+        isDisabled = true
+
+        // When: executing its associated reducer when isDisabled is true
+        let inputState3 = MockState(value: Int.random(in: 0...1_000_000))
+        let newState3 = reducer(inputState3, MockEvent())
+        // Then: the newState3 is the one from the input
+        XCTAssertEqual(newState3 as? MockState, inputState3)
+    }
 }
 
 extension TransitionTests {
