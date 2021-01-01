@@ -9,6 +9,7 @@ import Combine
 
 public enum SideEffect {}
 
+// swiftlint:disable function_parameter_count
 // MARK: make for (AnyPublisher<State, Never>) -> AnyPublisher<Event, Never>
 public extension SideEffect {
     static func make<Arg>(

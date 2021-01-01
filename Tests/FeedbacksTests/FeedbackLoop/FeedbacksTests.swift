@@ -81,22 +81,25 @@ extension FeedbacksTests {
     func testExecute_execute_all_sideEffects_on_expected_scheduler() {
         let exp = expectation(description: "Feedbacks.execute(on:)")
 
-        let expectedQueue = UUID().uuidString
-        var receivedQueues = [String]()
+        let expectedQueueA = UUID().uuidString
+        let expectedQueueB = UUID().uuidString
+        var receivedQueuesA = [String]()
+        var receivedQueuesB = [String]()
 
         // Given: a Feedbacks composed of feedbacks which side effect are recording there execution queues
         let sut = Feedbacks {
             Feedback(strategy: .continueOnNewState) { (state: MockStateA) -> AnyPublisher<Event, Never> in
-                receivedQueues.append(DispatchQueue.currentLabel)
+                receivedQueuesA.append(DispatchQueue.currentLabel)
                 return Just(MockEvent(value: 1)).eraseToAnyPublisher()
             }
+            .execute(on: DispatchQueue(label: expectedQueueA))
 
             Feedback(strategy: .continueOnNewState) { (state: MockStateA) -> AnyPublisher<Event, Never> in
-                receivedQueues.append(DispatchQueue.currentLabel)
+                receivedQueuesB.append(DispatchQueue.currentLabel)
                 return Just(MockEvent(value: 1)).eraseToAnyPublisher()
             }
         }
-        .execute(on: DispatchQueue(label: expectedQueue))
+        .execute(on: DispatchQueue(label: expectedQueueB))
 
         // When: executing all the Feedbacks's side effects
         let cancellable = sut
@@ -106,7 +109,8 @@ extension FeedbacksTests {
         waitForExpectations(timeout: 0.5)
 
         // Then: the side effects are executed on the expected queue
-        receivedQueues.forEach { XCTAssertEqual($0, expectedQueue) }
+        receivedQueuesA.forEach { XCTAssertEqual($0, expectedQueueA) }
+        receivedQueuesB.forEach { XCTAssertEqual($0, expectedQueueB) }
 
         cancellable.cancel()
     }
@@ -140,6 +144,30 @@ extension FeedbacksTests {
         XCTAssertTrue(feedbackAIsCalled)
         XCTAssertTrue(feedbackBIsCalled)
 
+        cancellable.cancel()
+    }
+}
+
+// MARK: tests for Feedbacks.add(feedback:)
+extension FeedbacksTests {
+    func testAdd_add_a_feedback() {
+        var sideEffectIsExecuted = false
+        
+        // Given: an empty Feedabcks
+        let sut = Feedbacks {}
+        
+        // When: adding a feedback that records its execution
+        let newFeedbacks = sut.add(feedback: Feedback(strategy: .continueOnNewState, sideEffect: { (state) -> AnyPublisher<Event, Never> in
+            sideEffectIsExecuted = true
+            return Empty().eraseToAnyPublisher()
+        }).execute(on: DispatchQueue.immediateScheduler))
+        
+        // when: executing the feedbacks
+        let cancellable = newFeedbacks.eventStream(Just(MockStateA(value: 1)).eraseToAnyPublisher()).sink(receiveValue: { _ in })
+        
+        // Then: the added feedback is executed
+        XCTAssertTrue(sideEffectIsExecuted)
+        
         cancellable.cancel()
     }
 }

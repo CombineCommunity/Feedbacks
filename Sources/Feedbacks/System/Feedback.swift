@@ -52,7 +52,7 @@ public struct Feedback {
     }
 }
 
-// MARKS: modifiers
+// MARK: modifiers
 public extension Feedback {
     func execute<SchedulerType: Scheduler>(on scheduler: SchedulerType) -> Feedback {
         let scheduledSideEffect: (AnyPublisher<State, Never>) -> AnyPublisher<Event, Never> = { states in
