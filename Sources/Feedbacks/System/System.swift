@@ -9,44 +9,50 @@ import Combine
 import Dispatch
 import Foundation
 
-public struct System {
+public class System {
     let initialState: InitialState
-    let feedbacks: Feedbacks
+    var feedbacks: Feedbacks
     let stateMachine: StateMachine
-    let scheduledStream: (AnyPublisher<Event, Never>) -> AnyPublisher<Event, Never>
+    var scheduledStream: (AnyPublisher<Event, Never>) -> AnyPublisher<Event, Never>
 
-    public init(@SystemBuilder _ system: () -> (InitialState, Feedbacks, StateMachine)) {
-        let (initialState, feedbacks, stateMachine) = system()
-        let defaultScheduler = DispatchQueue(label: "Feedbacks.System.\(UUID().uuidString)")
-        let scheduledStream = { (events: AnyPublisher<Event, Never>) in
-            events
-                .subscribe(on: defaultScheduler)
-                .receive(on: defaultScheduler)
-                .eraseToAnyPublisher()
-        }
-        self.init(initialState: initialState, feedbacks: feedbacks, stateMachine: stateMachine, scheduledStream: scheduledStream)
+    public convenience init(@SystemBuilder _ system: () -> (InitialState, Feedbacks, StateMachine)) {
+        let (initialState, feedbacks, stateMachine) = System.decode(builder: system)
+        self.init(initialState: initialState,
+                  feedbacks: feedbacks,
+                  stateMachine: stateMachine,
+                  scheduler: DispatchQueue(label: "Feedbacks.System.\(UUID().uuidString)"))
     }
 
-    init(initialState: InitialState,
-         feedbacks: Feedbacks,
-         stateMachine: StateMachine,
-         scheduledStream: @escaping (AnyPublisher<Event, Never>) -> AnyPublisher<Event, Never>) {
+    init<SchedulerType: Scheduler>(initialState: InitialState,
+                                   feedbacks: Feedbacks,
+                                   stateMachine: StateMachine,
+                                   scheduler: SchedulerType) {
         self.initialState = initialState
         self.feedbacks = feedbacks
         self.stateMachine = stateMachine
-        self.scheduledStream = scheduledStream
+        self.scheduledStream = { (events: AnyPublisher<Event, Never>) in
+            events
+                .subscribe(on: scheduler)
+                .receive(on: scheduler)
+                .eraseToAnyPublisher()
+        }
+    }
+
+    static func decode(builder system: () -> (InitialState, Feedbacks, StateMachine)) -> (InitialState, Feedbacks, StateMachine) {
+        let (initialState, feedbacks, stateMachine) = system()
+        return (initialState, feedbacks, stateMachine)
     }
 }
 
 public extension System {
     var stream: AnyPublisher<State, Never> {
-        Deferred<AnyPublisher<State, Never>> {
+        Deferred<AnyPublisher<State, Never>> { [initialState, feedbacks, stateMachine, scheduledStream] in
             let currentState = CurrentValueSubject<State, Never>(initialState.value)
 
             // merging all the effects into one event stream
             let stateInputStream = currentState.eraseToAnyPublisher()
             let eventStream = feedbacks.eventStream(stateInputStream)
-            let scheduledEventStream = self.scheduledStream(eventStream)
+            let scheduledEventStream = scheduledStream(eventStream)
 
             return scheduledEventStream
                 .scan(initialState.value, stateMachine.reducer)
@@ -58,82 +64,75 @@ public extension System {
 
 // MARK: modifiers
 public extension System {
-    func execute<SchedulerType: Scheduler>(on scheduler: SchedulerType) -> System {
-        let scheduledStream: (AnyPublisher<Event, Never>) -> AnyPublisher<Event, Never> = { events in
+    func execute<SchedulerType: Scheduler>(on scheduler: SchedulerType) -> Self {
+        self.scheduledStream = { events in
             events
                 .subscribe(on: scheduler)
                 .receive(on: scheduler)
                 .eraseToAnyPublisher()
         }
-        return System(initialState: self.initialState,
-                      feedbacks: self.feedbacks,
-                      stateMachine: self.stateMachine,
-                      scheduledStream: scheduledStream)
+
+        return self
     }
 
     func attach<MediatorType: Mediator>(
         to mediator: MediatorType,
         filterMediatorValue: @escaping (MediatorType.Output) -> Bool,
         emitSystemEvent: @escaping (MediatorType.Output) -> Event
-    ) -> System where MediatorType.Failure == Never {
-        let newFeedbacks = self.feedbacks.attach(to: mediator, filterMediatorValue: filterMediatorValue, emitSystemEvent: emitSystemEvent)
-
-        return System(initialState: self.initialState,
-                      feedbacks: newFeedbacks,
-                      stateMachine: self.stateMachine,
-                      scheduledStream: self.scheduledStream)
+    ) -> Self where MediatorType.Failure == Never {
+        self.feedbacks = self.feedbacks.attach(to: mediator,
+                                               filterMediatorValue:
+                                                filterMediatorValue,
+                                               emitSystemEvent: emitSystemEvent)
+        return self
     }
 
     func attach<MediatorType: Mediator>(
         to mediator: MediatorType,
         onMediatorValue: MediatorType.Output,
         emitSystemEvent: @escaping (MediatorType.Output) -> Event
-    ) -> System where MediatorType.Failure == Never, MediatorType.Output: Equatable {
-        let newFeedbacks = self.feedbacks.attach(to: mediator, onMediatorValue: onMediatorValue, emitSystemEvent: emitSystemEvent)
-
-        return System(initialState: self.initialState,
-                      feedbacks: newFeedbacks,
-                      stateMachine: self.stateMachine,
-                      scheduledStream: self.scheduledStream)
+    ) -> Self where MediatorType.Failure == Never, MediatorType.Output: Equatable {
+        self.feedbacks = self.feedbacks.attach(to: mediator,
+                                               onMediatorValue: onMediatorValue,
+                                               emitSystemEvent: emitSystemEvent)
+        return self
     }
 
     func attach<MediatorType: Mediator>(
         to mediator: MediatorType,
         filterSystemState: @escaping (State) -> Bool,
         emitMediatorValue: @escaping (State) -> MediatorType.Output
-    ) -> System where MediatorType.Failure == Never {
-        let newFeedbacks = self.feedbacks.attach(to: mediator, filterSystemState: filterSystemState, emitMediatorValue: emitMediatorValue)
-
-        return System(initialState: self.initialState,
-                      feedbacks: newFeedbacks,
-                      stateMachine: self.stateMachine,
-                      scheduledStream: self.scheduledStream)
+    ) -> Self where MediatorType.Failure == Never {
+        self.feedbacks = self.feedbacks.attach(to: mediator,
+                                               filterSystemState: filterSystemState,
+                                               emitMediatorValue: emitMediatorValue)
+        return self
     }
 
     func attach<MediatorType: Mediator, StateType: State>(
         to mediator: MediatorType,
         onSystemStateType: StateType.Type,
         emitMediatorValue: @escaping (StateType) -> MediatorType.Output
-    ) -> System where MediatorType.Failure == Never {
-        let newFeedbacks = self.feedbacks.attach(to: mediator, onSystemStateType: onSystemStateType, emitMediatorValue: emitMediatorValue)
-
-        return System(initialState: self.initialState,
-                      feedbacks: newFeedbacks,
-                      stateMachine: self.stateMachine,
-                      scheduledStream: self.scheduledStream)
+    ) -> Self where MediatorType.Failure == Never {
+        self.feedbacks = self.feedbacks.attach(to: mediator,
+                                               onSystemStateType: onSystemStateType,
+                                               emitMediatorValue: emitMediatorValue)
+        return self
     }
-    
+
     func attach<MediatorType: Mediator, StateType: State>(
         to mediator: MediatorType,
         onSystemState: StateType,
         emitMediatorValue: @escaping (StateType) -> MediatorType.Output
-    ) -> System where MediatorType.Failure == Never, StateType: Equatable {
-        let newFeedbacks = self.feedbacks.attach(to: mediator, onSystemState: onSystemState, emitMediatorValue: emitMediatorValue)
+    ) -> Self where MediatorType.Failure == Never, StateType: Equatable {
+        self.feedbacks = self.feedbacks.attach(to: mediator,
+                                               onSystemState: onSystemState,
+                                               emitMediatorValue: emitMediatorValue)
+        return self
+    }
 
-        return System(initialState: self.initialState,
-                      feedbacks: newFeedbacks,
-                      stateMachine: self.stateMachine,
-                      scheduledStream: self.scheduledStream)
+    func uiSystem<ViewState: State>(viewStateFactory: @escaping (State) -> ViewState) -> UISystem<ViewState> {
+        UISystem(system: self, viewStateFactory: viewStateFactory)
     }
 }
 

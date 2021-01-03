@@ -9,12 +9,12 @@ import Combine
 
 public struct Feedbacks {
     let feedbacks: [Feedback]
-    var onEventEmitted: ((Event) -> Void)? = nil
-    
+    var onEventEmitted: ((Event) -> Void)?
+
     public init(@FeedbacksBuilder _ feedbacks: () -> [Feedback]) {
         self.feedbacks = feedbacks()
     }
-    
+
     init(_ feedbacks: [Feedback], onEventEmitted: ((Event) -> Void)?) {
         self.feedbacks = feedbacks
         self.onEventEmitted = onEventEmitted
@@ -25,6 +25,12 @@ extension Feedbacks {
     func eventStream(_ stateStream: AnyPublisher<State, Never>) -> AnyPublisher<Event, Never> {
         let eventStreams = self.feedbacks.map { $0.sideEffect(stateStream.eraseToAnyPublisher()) }
         return Publishers.MergeMany(eventStreams).handleEvents(receiveOutput: self.onEventEmitted).eraseToAnyPublisher()
+    }
+}
+
+extension Feedbacks {
+    func add(feedback: Feedback) -> Feedbacks {
+        Feedbacks(self.feedbacks + [feedback], onEventEmitted: self.onEventEmitted)
     }
 }
 
@@ -41,10 +47,10 @@ extension Feedbacks {
                 .map(emitSystemEvent)
                 .eraseToAnyPublisher()
         }
-        
+
         return Feedbacks(self.feedbacks + [mediatorFeedback], onEventEmitted: self.onEventEmitted)
     }
-    
+
     func attach<MediatorType: Mediator>(
         to mediator: MediatorType,
         onMediatorValue: MediatorType.Output,
@@ -56,7 +62,7 @@ extension Feedbacks {
                            },
                            emitSystemEvent: emitSystemEvent)
     }
-    
+
     func attach<MediatorType: Mediator>(
         to mediator: MediatorType,
         filterSystemState: @escaping (State) -> Bool,
@@ -71,10 +77,10 @@ extension Feedbacks {
                 .flatMap { _ in Empty<Event, Never>().eraseToAnyPublisher() }
                 .eraseToAnyPublisher()
         }
-        
+
         return Feedbacks(self.feedbacks + [mediatorFeedback], onEventEmitted: self.onEventEmitted)
     }
-    
+
     func attach<MediatorType: Mediator, StateType: State>(
         to mediator: MediatorType,
         onSystemStateType: StateType.Type,
@@ -85,11 +91,11 @@ extension Feedbacks {
         } emitMediatorValue: { state in
             // force cast is acceptable here since a .filter() is applied to ensure the `state is StateType`. The use case is also
             // covered by unit tests.
+            // swiftlint:disable force_cast
             emitMediatorValue(state as! StateType)
         }
-        
     }
-    
+
     func attach<MediatorType: Mediator, StateType: State>(
         to mediator: MediatorType,
         onSystemState: StateType,
@@ -100,6 +106,7 @@ extension Feedbacks {
         } emitMediatorValue: { state in
             // force cast is acceptable here since a .filter() is applied to ensure the `state is StateType`. The use case is also
             // covered by unit tests.
+            // swiftlint:disable force_cast
             emitMediatorValue(state as! StateType)
         }
     }
@@ -111,18 +118,18 @@ public extension Feedbacks {
         let scheduledSchedulers = self.feedbacks.map { $0.execute(on: scheduler) }
         return Feedbacks(scheduledSchedulers, onEventEmitted: self.onEventEmitted)
     }
-    
+
     func onStateReceived(_ perform: @escaping (State) -> Void) -> Feedbacks {
         let stateReceivedFeedback = Feedback(strategy: .continueOnNewState) { (state: State) in
             perform(state)
             return Empty().eraseToAnyPublisher()
         }
-        
+
         let newFeedbacks = self.feedbacks + [stateReceivedFeedback]
-        
+
         return Feedbacks(newFeedbacks, onEventEmitted: self.onEventEmitted)
     }
-    
+
     func onEventEmitted(_ perform: @escaping (Event) -> Void) -> Feedbacks {
         Feedbacks(self.feedbacks, onEventEmitted: perform)
     }

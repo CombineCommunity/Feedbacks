@@ -33,12 +33,12 @@ public struct Transition: Transitions, Equatable {
             newState
         }
     }
-    
+
     init(transitionId: TransitionId, reducer: @escaping (State, Event) -> State) {
         self.transitionId = transitionId
         self.reducer = reducer
     }
-    
+
     public var entries: [TransitionId: (State, Event) -> State] {
         [self.transitionId: self.reducer]
     }
@@ -55,7 +55,7 @@ public extension Transition {
             guard !disabled() else { return state }
             return self.reducer(state, event)
         }
-        
+
         return Transition(transitionId: self.transitionId, reducer: disabledReducer)
     }
 }

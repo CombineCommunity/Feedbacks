@@ -7,6 +7,7 @@
 
 public struct InitialState {
     let value: State
+
     public init(_ value: () -> State) {
         self.value = value()
     }
