@@ -15,6 +15,8 @@ public class System {
     let transitions: Transitions
     var scheduledStream: (AnyPublisher<Event, Never>) -> AnyPublisher<Event, Never>
 
+    private var subscriptions = [AnyCancellable]()
+
     public convenience init(@SystemBuilder _ system: () -> (InitialState, Feedbacks, Transitions)) {
         let (initialState, feedbacks, transitions) = System.decode(builder: system)
         self.init(initialState: initialState,
@@ -59,6 +61,10 @@ public extension System {
                 .handleEvents(receiveOutput: currentState.send)
                 .eraseToAnyPublisher()
         }.eraseToAnyPublisher()
+    }
+
+    func run() {
+        self.stream.sink(receiveValue: { _ in }).store(in: &self.subscriptions)
     }
 }
 
