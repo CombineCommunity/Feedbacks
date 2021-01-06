@@ -30,7 +30,7 @@ final class UISystemTests: XCTestCase {
         },
         initialState: InitialState { MockState(value: Int.random(in: 0...1_000_000)) },
         feedbacks: Feedbacks {},
-        stateMachine: StateMachine{},
+        transitions: Transitions{},
         systemScheduler: DispatchQueue.immediateScheduler,
         viewStateScheduler: DispatchQueue.immediateScheduler)
         
@@ -61,7 +61,7 @@ final class UISystemTests: XCTestCase {
         },
         initialState: InitialState { expectedInitialState },
         feedbacks: Feedbacks {},
-        stateMachine: StateMachine {
+        transitions: Transitions {
             Transition(from: MockState.self, on: MockEvent.self, then: expectedState)
         },
         systemScheduler: DispatchQueue.immediateScheduler,
@@ -96,7 +96,7 @@ final class UISystemTests: XCTestCase {
         },
         initialState: InitialState { MockState(value: 1) },
         feedbacks: Feedbacks {},
-        stateMachine: StateMachine {
+        transitions: Transitions {
             Transition(from: MockState.self, on: MockEvent.self, then: MockState(value: 1))
         },
         systemScheduler: DispatchQueue.immediateScheduler,
@@ -128,7 +128,7 @@ final class UISystemTests: XCTestCase {
             Feedbacks {}
                 .onEventEmitted { receivedEvent = $0 }
             
-            StateMachine {}
+            Transitions {}
         }
         .execute(on: DispatchQueue.immediateScheduler)
         
@@ -157,7 +157,7 @@ final class UISystemTests: XCTestCase {
         feedbacks: Feedbacks {
             Feedback { _ in Empty().eraseToAnyPublisher() }.execute(on: DispatchQueue(label: UUID().uuidString))
         },
-        stateMachine: StateMachine {
+        transitions: Transitions {
             Transition(from: MockState.self, on: MockEvent.self) { state, event in
                 return MockState(value: state.value + event.value)
             }

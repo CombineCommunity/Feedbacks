@@ -39,7 +39,7 @@ final class UISystem_BindingTests: XCTestCase {
             Feedbacks {}
                 .onEventEmitted { receivedEvent = $0 }
 
-            StateMachine {}
+            Transitions {}
         }
         .execute(on: DispatchQueue.immediateScheduler)
         .executeViewStateFactory(on: DispatchQueue.immediateScheduler)
@@ -85,7 +85,7 @@ final class UISystem_BindingTests: XCTestCase {
             Feedbacks {}
                 .onEventEmitted { receivedEvent = $0 }
 
-            StateMachine {}
+            Transitions {}
         }
         .execute(on: DispatchQueue.immediateScheduler)
         .executeViewStateFactory(on: DispatchQueue.immediateScheduler)
@@ -128,7 +128,7 @@ final class UISystem_BindingTests: XCTestCase {
             Feedbacks {}
                 .onEventEmitted { receivedEvent = $0 }
 
-            StateMachine {}
+            Transitions {}
         }
         .execute(on: DispatchQueue.immediateScheduler)
         .executeViewStateFactory(on: DispatchQueue.immediateScheduler)

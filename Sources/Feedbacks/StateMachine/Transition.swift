@@ -5,7 +5,7 @@
 //  Created by Thibault Wittemberg on 2020-12-21.
 //
 
-public struct Transition: Transitions, Equatable {
+public struct Transition: TransitionsDefinition, Equatable {
     let transitionId: TransitionId
     let reducer: (State, Event) -> State
 
