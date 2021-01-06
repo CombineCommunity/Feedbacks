@@ -19,12 +19,12 @@ public class UISystem<ViewState: State & Equatable & CanBeUndefined>: System, Ob
     var scheduledViewStateFactoryStream: (AnyPublisher<State, Never>) -> AnyPublisher<State, Never>
 
     public convenience init(viewStateFactory: @escaping (State) -> ViewState,
-                            @SystemBuilder _ system: () -> (InitialState, Feedbacks, StateMachine)) {
-        let (initialState, feedbacks, stateMachine) = System.decode(builder: system)
+                            @SystemBuilder _ system: () -> (InitialState, Feedbacks, Transitions)) {
+        let (initialState, feedbacks, transitions) = System.decode(builder: system)
         self.init(viewStateFactory: viewStateFactory,
                   initialState: initialState,
                   feedbacks: feedbacks,
-                  stateMachine: stateMachine,
+                  transitions: transitions,
                   systemScheduler: DispatchQueue(label: "Feedbacks.System.\(UUID().uuidString)"),
                   viewStateScheduler: DispatchQueue(label: "Feedbacks.UISystem.\(UUID().uuidString)"))
     }
@@ -33,7 +33,7 @@ public class UISystem<ViewState: State & Equatable & CanBeUndefined>: System, Ob
         self.init(viewStateFactory: viewStateFactory,
                   initialState: system.initialState,
                   feedbacks: system.feedbacks,
-                  stateMachine: system.stateMachine,
+                  transitions: system.transitions,
                   systemScheduler: DispatchQueue(label: "Feedbacks.System.\(UUID().uuidString)"),
                   viewStateScheduler: DispatchQueue(label: "Feedbacks.UISystem.\(UUID().uuidString)"))
     }
@@ -43,7 +43,7 @@ public class UISystem<ViewState: State & Equatable & CanBeUndefined>: System, Ob
         viewStateFactory: @escaping (State) -> ViewState,
         initialState: InitialState,
         feedbacks: Feedbacks,
-        stateMachine: StateMachine,
+        transitions: Transitions,
         systemScheduler: SchedulerType,
         viewStateScheduler: ViewStateSchedulerType,
         extraStateRenderFunction: @escaping (State) -> Void = { _ in }
@@ -57,7 +57,7 @@ public class UISystem<ViewState: State & Equatable & CanBeUndefined>: System, Ob
                 .eraseToAnyPublisher()
         }
 
-        super.init(initialState: initialState, feedbacks: feedbacks, stateMachine: stateMachine, scheduler: systemScheduler)
+        super.init(initialState: initialState, feedbacks: feedbacks, transitions: transitions, scheduler: systemScheduler)
 
         let stateFeedback = Feedback { [weak self] (states: AnyPublisher<State, Never>) in
             guard let strongSelf = self else { return Empty().eraseToAnyPublisher() }

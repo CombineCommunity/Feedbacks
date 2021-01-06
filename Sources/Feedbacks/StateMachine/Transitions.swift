@@ -5,25 +5,60 @@
 //  Created by Thibault Wittemberg on 2020-12-23.
 //
 
-public struct TransitionId: Hashable {
-    let stateId: AnyHashable
-    let eventId: AnyHashable
+public struct Transitions: TransitionsDefinition {
+    let transitions: [TransitionsDefinition]
 
-    public init(stateId: AnyHashable, eventId: AnyHashable) {
-        self.stateId = stateId
-        self.eventId = eventId
+    public init(@TransitionsDefinitionsBuilder _ transitions: () -> [TransitionsDefinition]) {
+        self.transitions = transitions()
+    }
+
+    init(transitions: [TransitionsDefinition]) {
+        self.transitions = transitions
+    }
+
+    public var entries: [TransitionId: (State, Event) -> State] {
+        self.transitions.reduce(into: [TransitionId: (State, Event) -> State]()) { accumulator, transition in
+            accumulator.merge(transition.entries, uniquingKeysWith: { $1 })
+        }
     }
 }
 
-public protocol Transitions {
-    var entries: [TransitionId: (State, Event) -> State] { get }
+// MARK: modifiers
+public extension Transitions {
+    func disable(_ disabled: @escaping () -> Bool) -> Self {
+        let disabledTransitions = self.transitions.map { $0.disable(disabled) }
 
-    func disable(_ disabled: @escaping () -> Bool) -> Self
+        return Transitions(transitions: disabledTransitions)
+    }
 }
 
-@_functionBuilder
-public struct TransitionsBuilder {
-    public static func buildBlock(_ transitions: Transitions...) -> [Transitions] {
-        transitions
+public extension Transitions {
+    var reducer: (State, Event) -> State {
+        let entries = self.entries
+
+        return { state, event -> State in
+            let transitionId = TransitionId(stateId: state.instanceId, eventId: event.instanceId)
+
+            if let reducer = entries[transitionId] {
+                return reducer(state, event)
+            }
+
+            let transitionAnyEventId = TransitionId(stateId: state.instanceId, eventId: AnyEvent.id)
+            if let reducer = entries[transitionAnyEventId] {
+                return reducer(state, AnyEvent())
+            }
+
+            let transitionAnyStateId = TransitionId(stateId: AnyState.id, eventId: event.instanceId)
+            if let reducer = entries[transitionAnyStateId] {
+                return reducer(AnyState(), event)
+            }
+
+            let transitionAnyId = TransitionId(stateId: AnyState.id, eventId: AnyEvent.id)
+            if let reducer = entries[transitionAnyId] {
+                return reducer(AnyState(), AnyEvent())
+            }
+
+            return state
+        }
     }
 }

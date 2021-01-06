@@ -12,24 +12,24 @@ import Foundation
 public class System {
     let initialState: InitialState
     var feedbacks: Feedbacks
-    let stateMachine: StateMachine
+    let transitions: Transitions
     var scheduledStream: (AnyPublisher<Event, Never>) -> AnyPublisher<Event, Never>
 
-    public convenience init(@SystemBuilder _ system: () -> (InitialState, Feedbacks, StateMachine)) {
-        let (initialState, feedbacks, stateMachine) = System.decode(builder: system)
+    public convenience init(@SystemBuilder _ system: () -> (InitialState, Feedbacks, Transitions)) {
+        let (initialState, feedbacks, transitions) = System.decode(builder: system)
         self.init(initialState: initialState,
                   feedbacks: feedbacks,
-                  stateMachine: stateMachine,
+                  transitions: transitions,
                   scheduler: DispatchQueue(label: "Feedbacks.System.\(UUID().uuidString)"))
     }
 
     init<SchedulerType: Scheduler>(initialState: InitialState,
                                    feedbacks: Feedbacks,
-                                   stateMachine: StateMachine,
+                                   transitions: Transitions,
                                    scheduler: SchedulerType) {
         self.initialState = initialState
         self.feedbacks = feedbacks
-        self.stateMachine = stateMachine
+        self.transitions = transitions
         self.scheduledStream = { (events: AnyPublisher<Event, Never>) in
             events
                 .subscribe(on: scheduler)
@@ -38,15 +38,15 @@ public class System {
         }
     }
 
-    static func decode(builder system: () -> (InitialState, Feedbacks, StateMachine)) -> (InitialState, Feedbacks, StateMachine) {
-        let (initialState, feedbacks, stateMachine) = system()
-        return (initialState, feedbacks, stateMachine)
+    static func decode(builder system: () -> (InitialState, Feedbacks, Transitions)) -> (InitialState, Feedbacks, Transitions) {
+        let (initialState, feedbacks, transitions) = system()
+        return (initialState, feedbacks, transitions)
     }
 }
 
 public extension System {
     var stream: AnyPublisher<State, Never> {
-        Deferred<AnyPublisher<State, Never>> { [initialState, feedbacks, stateMachine, scheduledStream] in
+        Deferred<AnyPublisher<State, Never>> { [initialState, feedbacks, transitions, scheduledStream] in
             let currentState = CurrentValueSubject<State, Never>(initialState.value)
 
             // merging all the effects into one event stream
@@ -55,7 +55,7 @@ public extension System {
             let scheduledEventStream = scheduledStream(eventStream)
 
             return scheduledEventStream
-                .scan(initialState.value, stateMachine.reducer)
+                .scan(initialState.value, transitions.reducer)
                 .handleEvents(receiveOutput: currentState.send)
                 .eraseToAnyPublisher()
         }.eraseToAnyPublisher()
@@ -141,8 +141,8 @@ public struct SystemBuilder {
     public static func buildBlock(
         _ initialState: InitialState,
         _ feedbacks: Feedbacks,
-        _ stateMachine: StateMachine
-    ) -> (InitialState, Feedbacks, StateMachine) {
-        (initialState, feedbacks, stateMachine)
+        _ transitions: Transitions
+    ) -> (InitialState, Feedbacks, Transitions) {
+        (initialState, feedbacks, transitions)
     }
 }

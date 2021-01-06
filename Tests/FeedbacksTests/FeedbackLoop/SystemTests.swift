@@ -38,7 +38,7 @@ final class SystemTests: XCTestCase {
                 }
             }
             
-            StateMachine {
+            Transitions {
                 Transition(from: AnyState.self, on: AnyEvent.self, then: { _, _ in MockStateB(value: 1) })
             }
         }
@@ -89,7 +89,7 @@ final class SystemTests: XCTestCase {
                 .execute(on: DispatchQueue(label: expectedFeedbackBQueue))
             }
             
-            StateMachine {
+            Transitions {
                 Transition(from: MockStateA.self, on: MockNextEvent.self) { state, _ -> State in
                     receivedSystemQueue.append(DispatchQueue.currentLabel)
                     return MockStateB(value: state.value)
@@ -142,7 +142,7 @@ final class SystemTests: XCTestCase {
                 }
             }
             
-            StateMachine {
+            Transitions {
                 Transition(from: MockStateA.self, on: MockNextEvent.self) { state, _ -> State in
                     receivedSystemQueue.append(DispatchQueue.currentLabel)
                     return MockStateB(value: state.value)
@@ -222,7 +222,7 @@ final class SystemTests: XCTestCase {
                 .execute(on: DispatchQueue(label: UUID().uuidString))
             }
             
-            StateMachine {
+            Transitions {
                 Transition(from: MockStateA.self, on: MockNextEvent.self) { state, _ -> State in
                     return MockStateB(value: state.value)
                 }
@@ -274,7 +274,7 @@ final class SystemTests: XCTestCase {
                 Feedback { _ in Empty().eraseToAnyPublisher() }
             }
             
-            StateMachine {
+            Transitions {
                 Transition(from: MockStateA.self, on: MockNextEvent.self, then: MockStateB(value: 2))
             }
         }
@@ -318,7 +318,7 @@ final class SystemTests: XCTestCase {
                 Feedback { _ in Empty().eraseToAnyPublisher() }
             }
             
-            StateMachine {
+            Transitions {
                 Transition(from: MockStateA.self, on: MockNextEvent.self, then: MockStateB(value: 2))
             }
         }
@@ -361,7 +361,7 @@ final class SystemTests: XCTestCase {
                 Feedback { _ in Empty().eraseToAnyPublisher() }
             }
             
-            StateMachine {
+            Transitions {
                 Transition(from: MockStateA.self, on: MockNextEvent.self, then: MockStateB(value: 2))
             }
         }
@@ -413,7 +413,7 @@ final class SystemTests: XCTestCase {
                 Feedback { _ in Empty().eraseToAnyPublisher() }
             }
             
-            StateMachine {
+            Transitions {
                 Transition(from: MockStateA.self, on: MockNextEvent.self, then: MockStateB(value: 2))
             }
         }
@@ -465,7 +465,7 @@ final class SystemTests: XCTestCase {
                 Feedback { _ in Empty().eraseToAnyPublisher() }
             }
             
-            StateMachine {
+            Transitions {
                 Transition(from: MockStateA.self, on: MockNextEvent.self, then: MockStateB(value: 2))
             }
         }
@@ -515,6 +515,8 @@ final class SystemTests: XCTestCase {
                 MockViewState.unknown
             }
         }
+
+
         
         // Given: a system
         let sut = System {
@@ -531,7 +533,7 @@ final class SystemTests: XCTestCase {
             }
             .execute(on: DispatchQueue.immediateScheduler)
             
-            StateMachine {
+            Transitions {
                 Transition(from: MockStateA.self, on: MockEventA.self, then: MockStateB(value: 1))
             }
         }
@@ -553,10 +555,10 @@ final class SystemTests: XCTestCase {
         // Then: the UISystem has the expected specifications
         XCTAssertEqual(uiSystem.initialState.value as? MockStateA, sut.initialState.value as? MockStateA)
         XCTAssertEqual(uiSystem.feedbacks.feedbacks.count, sut.feedbacks.feedbacks.count + 2) // 2 UI feedbacks are added to the UISystem
-        XCTAssertEqual(uiSystem.stateMachine.transitions.count, sut.stateMachine.transitions.count)
+        XCTAssertEqual(uiSystem.transitions.transitions.count, sut.transitions.transitions.count)
         XCTAssertEqual(receivedState as? MockStateA, expectedState)
-        XCTAssertEqual(uiSystem.stateMachine.reducer(MockStateA(value: 1), MockNextEvent()) as? MockStateB,
-                       sut.stateMachine.reducer(MockStateA(value: 1), MockNextEvent()) as? MockStateB)
+        XCTAssertEqual(uiSystem.transitions.reducer(MockStateA(value: 1), MockNextEvent()) as? MockStateB,
+                       sut.transitions.reducer(MockStateA(value: 1), MockNextEvent()) as? MockStateB)
         
         cancellable.cancel()
     }
