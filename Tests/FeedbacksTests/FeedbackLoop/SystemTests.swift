@@ -257,6 +257,35 @@ final class SystemTests: XCTestCase {
         
         cancellable.cancel()
     }
+
+    func testRun_starts_the_stream() {
+        var streamIsStarted = false
+
+        // Given: a system
+        let sut = System {
+            InitialState {
+                MockStateA(value: 1)
+            }
+
+            Feedbacks {
+                Feedback { _ in Empty().eraseToAnyPublisher() }
+            }
+            .onStateReceived { _ in
+                streamIsStarted = true
+            }
+
+            Transitions {
+                Transition(from: MockStateA.self, on: MockNextEvent.self, then: MockStateB(value: 2))
+            }
+        }
+        .execute(on: DispatchQueue.immediateScheduler)
+
+        // When: running it
+        sut.run()
+
+        // Then: the system is started
+        XCTAssertTrue(streamIsStarted)
+    }
     
     func testAttach_catch_the_mediator_value_when_closure_and_emit_the_expectedEvent() {
         let mediator = PassthroughMediator<Int>()
