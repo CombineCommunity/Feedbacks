@@ -13,11 +13,19 @@ public protocol CanBeUndefined {
     static var undefined: Self { get }
 }
 
+/// A UISystem  is a decorator of a System. Its job is to add 2 UI feedbacks to the loop.
+/// 1 - A Feedback where the received state is mapped to a ViewState and then sent to a published value (on the main thread) so that UI components can react to it
+/// 2 - A Feedback the outputs a stream of user events
+/// The published states of a UISystem will be distinct as the state side effect checks for equality before publishing.
 public class UISystem<ViewState: State & Equatable & CanBeUndefined>: System, ObservableObject {
     @Published public private(set) var state: ViewState
     let events = PassthroughSubject<Event, Never>()
     var scheduledViewStateFactoryStream: (AnyPublisher<State, Never>) -> AnyPublisher<State, Never>
 
+    /// Creates a UISystem based on the 3 components of a System (initial state, feedbacks, state machine) and a View State factory function
+    /// - Parameters:
+    ///   - viewStateFactory: the function to apply to each State produced by the System
+    ///   - system: the 3 components of the System
     public convenience init(viewStateFactory: @escaping (State) -> ViewState,
                             @SystemBuilder _ system: () -> (InitialState, Feedbacks, Transitions)) {
         let (initialState, feedbacks, transitions) = System.decode(builder: system)
@@ -29,6 +37,10 @@ public class UISystem<ViewState: State & Equatable & CanBeUndefined>: System, Ob
                   viewStateScheduler: DispatchQueue(label: "Feedbacks.UISystem.\(UUID().uuidString)"))
     }
 
+    /// Creates a UISystem based on an existing System and a View State factory function
+    /// - Parameters:
+    ///   - system: the existing System
+    ///   - viewStateFactory: the function to apply to each State produced by the System
     public convenience init(system: System, viewStateFactory: @escaping (State) -> ViewState) {
         self.init(viewStateFactory: viewStateFactory,
                   initialState: system.initialState,
@@ -82,6 +94,8 @@ public class UISystem<ViewState: State & Equatable & CanBeUndefined>: System, Ob
         self.feedbacks = self.feedbacks.add(feedback: stateFeedback).add(feedback: eventFeedback)
     }
 
+    /// Emits an  Event in the System, in order to trigger a Transition
+    /// - Parameter event: The event to emit
     public func emit(_ event: Event) {
         self.events.send(event)
     }
@@ -103,6 +117,12 @@ public extension UISystem {
 import SwiftUI
 
 public extension UISystem {
+
+    /// Provides a binding on the System's View State
+    /// - Parameters:
+    ///   - keyPath: the path to the View State's property to expose as a Binding
+    ///   - emit: the Event to emit when the binding is mutated
+    /// - Returns: the binding on the View State
     func binding<Output>(keyPath: KeyPath<ViewState, Output>, emit: @escaping (Output) -> Event) -> Binding<Output> {
         Binding<Output> { [state] in
             state[keyPath: keyPath]
@@ -111,10 +131,18 @@ public extension UISystem {
         }
     }
 
+    /// Provides a binding on the System's Vies State
+    /// - Parameters:
+    ///   - keyPath: the path to the View State's property to expose as a Binding
+    ///   - event: the Event to emit when the binding is mutated
+    /// - Returns: the binding on the View State
     func binding<Output>(keyPath: KeyPath<ViewState, Output>, emit event: Event) -> Binding<Output> {
         self.binding(keyPath: keyPath, emit: { _ in event })
     }
 
+    /// Provides a read-only binding on the System's Vies State
+    /// - Parameter keyPath: the path to the View State's property to expose as a Binding
+    /// - Returns: the binding on the View State
     func binding<Output>(keyPath: KeyPath<ViewState, Output>) -> Binding<Output> {
         Binding<Output> { [state] in
             state[keyPath: keyPath]

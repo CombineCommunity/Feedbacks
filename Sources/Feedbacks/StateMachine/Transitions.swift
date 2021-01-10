@@ -5,9 +5,15 @@
 //  Created by Thibault Wittemberg on 2020-12-23.
 //
 
+/// Represents a series of Transitions to form a State Machine.
 public struct Transitions: TransitionsDefinition {
     let transitions: [TransitionsDefinition]
 
+    /// - Parameter transitions: the individual transitions composing the state machine
+    /// `Transitions {`
+    ///     `Transition(from: LoadingState.self, on: LoadedEvent.self, then: LoadedState())`
+    ///     `Transition(from: LoadingState.self, on: ErrorEvent.self, then: ErrorState())`
+    /// `}`
     public init(@TransitionsDefinitionsBuilder _ transitions: () -> [TransitionsDefinition]) {
         self.transitions = transitions()
     }

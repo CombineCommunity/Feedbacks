@@ -172,7 +172,7 @@ extension FeedbacksTests {
     }
 }
 
-// MARK: tests for Feedbacks.attach(to:onMediatorEvent:emitSystemEvent:)
+// MARK: tests for Feedbacks.attach()
 extension FeedbacksTests {
     func testAttach_catch_the_mediator_value_when_closure_and_emit_the_expectedEvent() {
         let randomValue = Int.random(in: 1...1_000_000)
@@ -187,7 +187,47 @@ extension FeedbacksTests {
             Feedback { _ in Empty().eraseToAnyPublisher() }
         }
         .attach(to: mediator,
-                filterMediatorValue: { $0 == randomValue },
+                emitSystemEvent: {
+                    $0 == randomValue ? MockEvent(value: $0) : nil
+                })
+        .onEventEmitted { receivedEvent = $0 }
+        .execute(on: DispatchQueue.immediateScheduler)
+
+        // When: executing the underlying reactive stream
+        let cancellable = sut.eventStream(Just(MockStateA(value: 0)).eraseToAnyPublisher()).sink(receiveValue: { _ in })
+
+        // When: the mediator output a value that does not match the `attach` criteria
+        mediator.send(randomValue-1)
+        // Then: no event is sent by the Feedbacks
+        XCTAssertNil(receivedEvent)
+
+        // When: the mediator output a value that does match the `attach` criteria
+        mediator.send(randomValue)
+        // Then: the expected event is sent by the Feedbacks
+        XCTAssertEqual(receivedEvent as? MockEvent, expectedEvent)
+
+        // When: the mediator output a value that does not match the `attach` criteria
+        mediator.send(randomValue-2)
+        // Then: no event is sent by the Feedbacks
+        XCTAssertEqual(receivedEvent as? MockEvent, expectedEvent)
+
+        cancellable.cancel()
+    }
+
+    func testAttach_catch_the_mediator_value_and_emit_the_expectedEvent_when_state_as_an_input() {
+        let randomValue = Int.random(in: 1...1_000_000)
+        var receivedEvent: Event?
+        let expectedEvent = MockEvent(value: randomValue)
+
+        // Given: a mediator that handles Integer values
+        // Given: a Feedbacks that is attached to this mediator and trigger a MockEvent when the mediator's value is equal to randomValue
+        // Given: a spy `onEventEmitted` modifier that records Events from the stream
+        let mediator = PassthroughMediator<Int>()
+        let sut = Feedbacks {
+            Feedback { _ in Empty().eraseToAnyPublisher() }
+        }
+        .attach(to: mediator,
+                onMediatorValue: randomValue,
                 emitSystemEvent: { MockEvent(value: $0) })
         .onEventEmitted { receivedEvent = $0 }
         .execute(on: DispatchQueue.immediateScheduler)
@@ -227,7 +267,7 @@ extension FeedbacksTests {
         }
         .attach(to: mediator,
                 onMediatorValue: randomValue,
-                emitSystemEvent: { MockEvent(value: $0) })
+                emitSystemEvent: expectedEvent)
         .onEventEmitted { receivedEvent = $0 }
         .execute(on: DispatchQueue.immediateScheduler)
 
@@ -262,8 +302,7 @@ extension FeedbacksTests {
             Feedback { _ in Empty().eraseToAnyPublisher() }
         }
         .attach(to: mediator,
-                filterSystemState: { $0 is MockStateA },
-                emitMediatorValue: { _ in expectedValue })
+                emitMediatorValue: { $0 is MockStateA ? expectedValue : nil })
         .execute(on: DispatchQueue.immediateScheduler)
 
         let inputStateSubject = PassthroughSubject<State, Never>()
@@ -289,7 +328,7 @@ extension FeedbacksTests {
         cancellable.cancel()
     }
     
-    func testAttach_catch_the_feedbacks_stateType_and_emit_the_expectedMediatorValue() {
+    func testAttach_catch_the_feedbacks_stateType_and_emit_the_expectedMediatorValue_when_state_iS_given_as_an_input() {
         let expectedValue = Int.random(in: 1...1_000_000)
 
         // Given: a mediator that handles Integer values
@@ -325,8 +364,45 @@ extension FeedbacksTests {
 
         cancellable.cancel()
     }
+
+    func testAttach_catch_the_feedbacks_stateType_and_emit_the_expectedMediatorValue() {
+        let expectedValue = Int.random(in: 1...1_000_000)
+
+        // Given: a mediator that handles Integer values
+        // Given: a Feedbacks that is attached to this mediator and propagates a new value when the state is of type MockStateA
+        let mediator = CurrentValueMediator<Int>(-1)
+        let sut = Feedbacks {
+            Feedback { _ in Empty().eraseToAnyPublisher() }
+        }
+        .attach(to: mediator,
+                onSystemStateType: MockStateA.self,
+                emitMediatorValue: expectedValue)
+        .execute(on: DispatchQueue.immediateScheduler)
+
+        let inputStateSubject = PassthroughSubject<State, Never>()
+
+        // When: executing the underlying reactive stream
+        let cancellable = sut.eventStream(inputStateSubject.eraseToAnyPublisher()).sink(receiveValue: { _ in })
+
+        // When: the system's state is MockStateB
+        inputStateSubject.send(MockStateB())
+        // Then: no value is propagated to the mediator
+        XCTAssertEqual(mediator.value, -1)
+
+        // When: the system's state is MockStateA
+        inputStateSubject.send(MockStateA(value: 1701))
+        // Then: the expected value is propagated to the mediator
+        XCTAssertEqual(mediator.value, expectedValue)
+
+        // When: the system's state is MockStateB
+        inputStateSubject.send(MockStateB())
+        // Then: no value is propagated to the mediator
+        XCTAssertEqual(mediator.value, expectedValue)
+
+        cancellable.cancel()
+    }
     
-    func testAttach_catch_the_feedbacks_state_and_emit_the_expectedMediatorValue() {
+    func testAttach_catch_the_feedbacks_state_and_emit_the_expectedMediatorValue_when_state_is_given_as_an_input() {
         let expectedValue = Int.random(in: 1...1_000_000)
 
         // Given: a mediator that handles Integer values
@@ -338,6 +414,43 @@ extension FeedbacksTests {
         .attach(to: mediator,
                 onSystemState: MockStateA(value: expectedValue),
                 emitMediatorValue: { $0.value })
+        .execute(on: DispatchQueue.immediateScheduler)
+
+        let inputStateSubject = PassthroughSubject<State, Never>()
+
+        // When: executing the underlying reactive stream
+        let cancellable = sut.eventStream(inputStateSubject.eraseToAnyPublisher()).sink(receiveValue: { _ in })
+
+        // When: the system's state is MockStateB
+        inputStateSubject.send(MockStateB())
+        // Then: no value is propagated to the mediator
+        XCTAssertEqual(mediator.value, -1)
+
+        // When: the system's state is MockStateA
+        inputStateSubject.send(MockStateA(value: expectedValue))
+        // Then: the expected value is propagated to the mediator
+        XCTAssertEqual(mediator.value, expectedValue)
+
+        // When: the system's state is MockStateB
+        inputStateSubject.send(MockStateB())
+        // Then: no value is propagated to the mediator
+        XCTAssertEqual(mediator.value, expectedValue)
+
+        cancellable.cancel()
+    }
+
+    func testAttach_catch_the_feedbacks_state_and_emit_the_expectedMediatorValue() {
+        let expectedValue = Int.random(in: 1...1_000_000)
+
+        // Given: a mediator that handles Integer values
+        // Given: a Feedbacks that is attached to this mediator and propagates a new value when the state is equal to a specific MockStateA
+        let mediator = CurrentValueMediator<Int>(-1)
+        let sut = Feedbacks {
+            Feedback { _ in Empty().eraseToAnyPublisher() }
+        }
+        .attach(to: mediator,
+                onSystemState: MockStateA(value: expectedValue),
+                emitMediatorValue: expectedValue)
         .execute(on: DispatchQueue.immediateScheduler)
 
         let inputStateSubject = PassthroughSubject<State, Never>()
