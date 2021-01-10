@@ -294,7 +294,7 @@ Systems should be self contained and limited to their business. We should pay at
 
 There is a pattern for that in OOP: Mediator. A Mediator acts as a communication bus between independent components in order to garantee their decoupling.
 
-There are two types of Mediator: `CurrentValueMediator` and `PassthroughMediator`. They are basically typealises on `CurrentValueSubject` and `PassthroughSubject`.
+Feedbacks comes eith two types of Mediator: `CurrentValueMediator` and `PassthroughMediator`. They are basically typealises on `CurrentValueSubject` and `PassthroughSubject`.
 
 To attach two Systems together:
 
@@ -312,7 +312,29 @@ let systemB = System {
 
 When systemA emits a `LoadedState` state, the mediator will propagate the `1701` value among its subscribers and systemB will trigger a `LoadedDoneEvent`.
 
-There are several variations of the `attach(to:)` modifiers.
+This way of doing is nice when you do not have a reference on the 2 systems at the same time. You can pass the mediator around or make sure a common instance is injected to you to make the link between your Systems.
+
+If by chance you have a reference on both Systems, you can attach them without a mediator:
+
+```swift
+let systemA = System {
+	...
+}
+
+let systemB = System {
+	...
+}
+
+let (attachedSystemA, attachedSystemB) = systemA.attach(
+		to: systemB,
+		onSystemStateType: LoadedState.self,
+		emitAttachedSystemEvent: { stateFromA in
+			LoadedEvent(data: stateFromA.data)
+		}
+)
+```
+
+When the systemA will encounter the state: `LoadedState`, the systemB will trigger a `LoadedEvent` event.
 
 # Using Feedbacks with SwiftUI and UIKit
 

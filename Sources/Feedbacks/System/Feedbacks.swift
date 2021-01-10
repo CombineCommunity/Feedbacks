@@ -7,10 +7,24 @@
 
 import Combine
 
+/// Represents a series of Feedbacks to form a System
 public struct Feedbacks {
     let feedbacks: [Feedback]
     var onEventEmitted: ((Event) -> Void)?
 
+    /// - Parameter feedbacks: the individual feedbacks composing the System
+    ///
+    /// `Feedbacks {`
+    ///     `Feedback(strategy: .continueOnNewState) { (state: LoadingState) in`
+    ///          `...`
+    ///          `Just(LoadedEvent()).eraseToAnyPublisher()`
+    ///     `}`
+    ///
+    ///     `Feedback(strategy: .continueOnNewState) { (state: LoadingState) in`
+    ///          `...`
+    ///          `Just(ErrorEvent()).eraseToAnyPublisher()`
+    ///     `}`
+    /// `}`
     public init(@FeedbacksBuilder _ feedbacks: () -> [Feedback]) {
         self.feedbacks = feedbacks()
     }
@@ -38,17 +52,10 @@ extension Feedbacks {
 extension Feedbacks {
     func attach<MediatorType: Mediator>(
         to mediator: MediatorType,
-        filterMediatorValue: @escaping (MediatorType.Output) -> Bool,
-        emitSystemEvent: @escaping (MediatorType.Output) -> Event
+        emitSystemEvent: @escaping (MediatorType.Output) -> Event?
     ) -> Feedbacks where MediatorType.Failure == Never {
-        let mediatorFeedback = Feedback { _ -> AnyPublisher<Event, Never> in
-            mediator
-                .filter(filterMediatorValue)
-                .map(emitSystemEvent)
-                .eraseToAnyPublisher()
-        }
-
-        return Feedbacks(self.feedbacks + [mediatorFeedback], onEventEmitted: self.onEventEmitted)
+        let mediatorFeedback = Feedback(mediator: mediator, emitSystemEvent: emitSystemEvent)
+        return self.add(feedback: mediatorFeedback)
     }
 
     func attach<MediatorType: Mediator>(
@@ -56,29 +63,25 @@ extension Feedbacks {
         onMediatorValue: MediatorType.Output,
         emitSystemEvent: @escaping (MediatorType.Output) -> Event
     ) -> Feedbacks where MediatorType.Failure == Never, MediatorType.Output: Equatable {
-        return self.attach(to: mediator,
-                           filterMediatorValue: { mediatorValue -> Bool in
-                            mediatorValue == onMediatorValue
-                           },
-                           emitSystemEvent: emitSystemEvent)
+        let mediatorFeedback = Feedback(mediator: mediator, onMediatorValue: onMediatorValue, emitSystemEvent: emitSystemEvent)
+        return self.add(feedback: mediatorFeedback)
     }
 
     func attach<MediatorType: Mediator>(
         to mediator: MediatorType,
-        filterSystemState: @escaping (State) -> Bool,
-        emitMediatorValue: @escaping (State) -> MediatorType.Output
-    ) -> Feedbacks where MediatorType.Failure == Never {
-        let mediatorFeedback = Feedback { (states: AnyPublisher<State, Never>) -> AnyPublisher<Event, Never> in
-            states
-                .filter(filterSystemState)
-                .handleEvents(receiveOutput: { state in
-                    mediator.send(emitMediatorValue(state))
-                })
-                .flatMap { _ in Empty<Event, Never>().eraseToAnyPublisher() }
-                .eraseToAnyPublisher()
-        }
+        onMediatorValue: MediatorType.Output,
+        emitSystemEvent: Event
+    ) -> Feedbacks where MediatorType.Failure == Never, MediatorType.Output: Equatable {
+        let mediatorFeedback = Feedback(mediator: mediator, onMediatorValue: onMediatorValue, emitSystemEvent: emitSystemEvent)
+        return self.add(feedback: mediatorFeedback)
+    }
 
-        return Feedbacks(self.feedbacks + [mediatorFeedback], onEventEmitted: self.onEventEmitted)
+    func attach<MediatorType: Mediator>(
+        to mediator: MediatorType,
+        emitMediatorValue: @escaping (State) -> MediatorType.Output?
+    ) -> Feedbacks where MediatorType.Failure == Never {
+        let mediatorFeedback = Feedback(mediator: mediator, emitMediatorValue: emitMediatorValue)
+        return self.add(feedback: mediatorFeedback)
     }
 
     func attach<MediatorType: Mediator, StateType: State>(
@@ -86,14 +89,17 @@ extension Feedbacks {
         onSystemStateType: StateType.Type,
         emitMediatorValue: @escaping (StateType) -> MediatorType.Output
     ) -> Feedbacks where MediatorType.Failure == Never {
-        return self.attach(to: mediator) { state -> Bool in
-            state is StateType
-        } emitMediatorValue: { state in
-            // force cast is acceptable here since a .filter() is applied to ensure the `state is StateType`. The use case is also
-            // covered by unit tests.
-            // swiftlint:disable force_cast
-            emitMediatorValue(state as! StateType)
-        }
+        let mediatorFeedback = Feedback(mediator: mediator, onSystemStateType: onSystemStateType, emitMediatorValue: emitMediatorValue)
+        return self.add(feedback: mediatorFeedback)
+    }
+
+    func attach<MediatorType: Mediator, StateType: State>(
+        to mediator: MediatorType,
+        onSystemStateType: StateType.Type,
+        emitMediatorValue: MediatorType.Output
+    ) -> Feedbacks where MediatorType.Failure == Never {
+        let mediatorFeedback = Feedback(mediator: mediator, onSystemStateType: onSystemStateType, emitMediatorValue: emitMediatorValue)
+        return self.add(feedback: mediatorFeedback)
     }
 
     func attach<MediatorType: Mediator, StateType: State>(
@@ -101,24 +107,33 @@ extension Feedbacks {
         onSystemState: StateType,
         emitMediatorValue: @escaping (StateType) -> MediatorType.Output
     ) -> Feedbacks where MediatorType.Failure == Never, StateType: Equatable {
-        return self.attach(to: mediator) { state -> Bool in
-            (state as? StateType) == onSystemState
-        } emitMediatorValue: { state in
-            // force cast is acceptable here since a .filter() is applied to ensure the `state is StateType`. The use case is also
-            // covered by unit tests.
-            // swiftlint:disable force_cast
-            emitMediatorValue(state as! StateType)
-        }
+        let mediatorFeedback = Feedback(mediator: mediator, onSystemState: onSystemState, emitMediatorValue: emitMediatorValue)
+        return self.add(feedback: mediatorFeedback)
+    }
+
+    func attach<MediatorType: Mediator, StateType: State>(
+        to mediator: MediatorType,
+        onSystemState: StateType,
+        emitMediatorValue: MediatorType.Output
+    ) -> Feedbacks where MediatorType.Failure == Never, StateType: Equatable {
+        let mediatorFeedback = Feedback(mediator: mediator, onSystemState: onSystemState, emitMediatorValue: emitMediatorValue)
+        return self.add(feedback: mediatorFeedback)
     }
 }
 
 // MARK: modifiers
 public extension Feedbacks {
+    /// All the Feedbacks will be executed on the specified scheduler
+    /// - Parameter scheduler: the scheduler on which to execute the feedbacks
+    /// - Returns: a new Feedbacks, that executes the same side effects, but on the specified scheduler
     func execute<SchedulerType: Scheduler>(on scheduler: SchedulerType) -> Feedbacks {
         let scheduledSchedulers = self.feedbacks.map { $0.execute(on: scheduler) }
         return Feedbacks(scheduledSchedulers, onEventEmitted: self.onEventEmitted)
     }
 
+    /// A middleware that is executed every time a new state is given as an input to all the Feedbacks
+    /// - Parameter perform: the middleware to execute
+    /// - Returns: the Feedbacks that executes the middleware before executing the side effects
     func onStateReceived(_ perform: @escaping (State) -> Void) -> Feedbacks {
         let stateReceivedFeedback = Feedback(strategy: .continueOnNewState) { (state: State) in
             perform(state)
@@ -130,6 +145,9 @@ public extension Feedbacks {
         return Feedbacks(newFeedbacks, onEventEmitted: self.onEventEmitted)
     }
 
+    /// A middleware that is executed every time a new event is emitted by the Feedbacks
+    /// - Parameter perform: the middleware to execute
+    /// - Returns: the Feedbacks that executes the middleware after executing the side effects
     func onEventEmitted(_ perform: @escaping (Event) -> Void) -> Feedbacks {
         Feedbacks(self.feedbacks, onEventEmitted: perform)
     }

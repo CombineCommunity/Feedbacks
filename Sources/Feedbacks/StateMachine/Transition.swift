@@ -5,10 +5,21 @@
 //  Created by Thibault Wittemberg on 2020-12-21.
 //
 
+/// A Transition describes the passage from a State to another, in reaction to an event.
+/// The pair of input state and event forms a TransitionId, which identifies the Transition within a  state machine.
+/// As a TransitionId is Hashable, there cannot exist 2 Transitions with the same pair State/Event in one state machine.
+/// In that case, the last declared transition will be the one executed.
 public struct Transition: TransitionsDefinition, Equatable {
     let transitionId: TransitionId
     let reducer: (State, Event) -> State
 
+    /// Build a Transition based on a State type and an Event type. The transition will produce a new state by executing the `then` reducer
+    /// - Parameters:
+    ///   - stateType: The type of state that is concerned by this transition
+    ///   - eventType: The type of event that is concerned by this transition
+    ///   - reducer: The new state factory based on the received state and event
+    ///
+    /// `Transition(from: LoadingState.self, on: LoadedEvent.self, then: { _, event in return LoadedState(data: event.data) })`
     public init<StateType: State, EventType: Event>(
         from stateType: StateType.Type,
         on eventType: EventType.Type,
@@ -25,6 +36,11 @@ public struct Transition: TransitionsDefinition, Equatable {
         }
     }
 
+    /// Build a Transition based on a State type and an Event type. The transition will produce the `newState` state
+    /// - Parameters:
+    ///   - stateType: The type of state that is concerned by this transition
+    ///   - eventType: The type of event that is concerned by this transition
+    ///   - newState: The new state
     public init<StateType: State, EventType: Event>(
         from stateType: StateType.Type,
         on eventType: EventType.Type,

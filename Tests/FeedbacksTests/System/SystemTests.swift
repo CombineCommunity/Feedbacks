@@ -307,7 +307,7 @@ final class SystemTests: XCTestCase {
                 Transition(from: MockStateA.self, on: MockNextEvent.self, then: MockStateB(value: 2))
             }
         }
-        .attach(to: mediator, filterMediatorValue: { $0 == 1701 }, emitSystemEvent: { _ in expectedEvent })
+        .attach(to: mediator, emitSystemEvent: { $0 == 1701 ? expectedEvent : nil })
         .execute(on: DispatchQueue.immediateScheduler)
         
         // When: executing the last added feedback to the system
@@ -325,13 +325,13 @@ final class SystemTests: XCTestCase {
         
         // When: the mediator output a value that does match the `attach` criteria
         mediator.send(1701)
-        // Then: the expected event is sent by the feedabck
+        // Then: the expected event is sent by the feedback
         XCTAssertEqual(receivedEvent as? MockEventA, expectedEvent)
         
         cancellable.cancel()
     }
     
-    func testAttach_catch_the_mediator_value_and_emit_the_expectedEvent() {
+    func testAttach_catch_the_mediator_value_and_emit_the_expectedEvent_when_value_is_given_as_an_input() {
         let mediator = PassthroughMediator<Int>()
         
         let expectedEvent = MockEventA(value: Int.random(in: 0...1_000_000))
@@ -369,9 +369,53 @@ final class SystemTests: XCTestCase {
         
         // When: the mediator output a value that does match the `attach` criteria
         mediator.send(1701)
-        // Then: the expected event is sent by the feedabck
+        // Then: the expected event is sent by the feedback
         XCTAssertEqual(receivedEvent as? MockEventA, expectedEvent)
         
+        cancellable.cancel()
+    }
+
+    func testAttach_catch_the_mediator_value_and_emit_the_expectedEvent() {
+        let mediator = PassthroughMediator<Int>()
+
+        let expectedEvent = MockEventA(value: Int.random(in: 0...1_000_000))
+        var receivedEvent: Event?
+
+        // Given: a system attached to a mediator that emits Integer values
+        let sut = System {
+            InitialState {
+                MockStateA(value: 1)
+            }
+
+            Feedbacks {
+                Feedback { _ in Empty().eraseToAnyPublisher() }
+            }
+
+            Transitions {
+                Transition(from: MockStateA.self, on: MockNextEvent.self, then: MockStateB(value: 2))
+            }
+        }
+        .attach(to: mediator, onMediatorValue: 1701 , emitSystemEvent: expectedEvent)
+        .execute(on: DispatchQueue.immediateScheduler)
+
+        // When: executing the last added feedback to the system
+        let cancellable = sut
+            .feedbacks
+            .feedbacks
+            .last!
+            .sideEffect(Just(MockStateA(value: 1)).eraseToAnyPublisher())
+            .sink(receiveCompletion: { _ in }, receiveValue: { receivedEvent = $0 })
+
+        // When: the mediator output a value that does not match the `attach` criteria
+        mediator.send(0)
+        // Then: no event is sent by the feedback
+        XCTAssertNil(receivedEvent)
+
+        // When: the mediator output a value that does match the `attach` criteria
+        mediator.send(1701)
+        // Then: the expected event is sent by the feedback
+        XCTAssertEqual(receivedEvent as? MockEventA, expectedEvent)
+
         cancellable.cancel()
     }
     
@@ -395,8 +439,7 @@ final class SystemTests: XCTestCase {
             }
         }
         .attach(to: mediator,
-                filterSystemState: { $0 is MockStateA },
-                emitMediatorValue: { _ in expectedValue })
+                emitMediatorValue: { $0 is MockStateA ? expectedValue : nil })
         .execute(on: DispatchQueue.immediateScheduler)
         
         let inputStateSubject = PassthroughSubject<State, Never>()
@@ -427,7 +470,7 @@ final class SystemTests: XCTestCase {
         cancellable.cancel()
     }
     
-    func testAttach_catch_the_feedbacks_stateType_and_emit_the_expectedMediatorValue() {
+    func testAttach_catch_the_feedbacks_stateType_and_emit_the_expectedMediatorValue_when_state_is_given_as_an_input() {
         let expectedValue = Int.random(in: 1...1_000_000)
         
         // Given: a mediator that handles Integer values
@@ -478,8 +521,60 @@ final class SystemTests: XCTestCase {
         
         cancellable.cancel()
     }
+
+    func testAttach_catch_the_feedbacks_stateType_and_emit_the_expectedMediatorValue() {
+        let expectedValue = Int.random(in: 1...1_000_000)
+
+        // Given: a mediator that handles Integer values
+        // Given: a System that is attached to this mediator and propagates a new value when the state is MockStateA
+        let mediator = CurrentValueMediator<Int>(-1)
+        let sut = System {
+            InitialState {
+                MockStateA(value: 1)
+            }
+
+            Feedbacks {
+                Feedback { _ in Empty().eraseToAnyPublisher() }
+            }
+
+            Transitions {
+                Transition(from: MockStateA.self, on: MockNextEvent.self, then: MockStateB(value: 2))
+            }
+        }
+        .attach(to: mediator,
+                onSystemStateType: MockStateA.self,
+                emitMediatorValue: expectedValue)
+        .execute(on: DispatchQueue.immediateScheduler)
+
+        let inputStateSubject = PassthroughSubject<State, Never>()
+
+        // When: executing the last added feedback to the system
+        let cancellable = sut
+            .feedbacks
+            .feedbacks
+            .last!
+            .sideEffect(inputStateSubject.eraseToAnyPublisher())
+            .sink(receiveCompletion: { _ in }, receiveValue: { _ in })
+
+        // When: the system's state is MockStateB
+        inputStateSubject.send(MockStateB(value: 1))
+        // Then: no value is propagated to the mediator
+        XCTAssertEqual(mediator.value, -1)
+
+        // When: the system's state is MockStateA
+        inputStateSubject.send(MockStateA(value: expectedValue))
+        // Then: the expected value is propagated to the mediator
+        XCTAssertEqual(mediator.value, expectedValue)
+
+        // When: the system's state is MockStateB
+        inputStateSubject.send(MockStateB(value: 2))
+        // Then: no value is propagated to the mediator
+        XCTAssertEqual(mediator.value, expectedValue)
+
+        cancellable.cancel()
+    }
     
-    func testAttach_catch_the_feedbacks_state_and_emit_the_expectedMediatorValue() {
+    func testAttach_catch_the_feedbacks_state_and_emit_the_expectedMediatorValue_when_state_is_given_as_an_input() {
         let expectedValue = Int.random(in: 1...1_000_000)
         
         // Given: a mediator that handles Integer values
@@ -529,6 +624,112 @@ final class SystemTests: XCTestCase {
         XCTAssertEqual(mediator.value, expectedValue)
         
         cancellable.cancel()
+    }
+
+    func testAttach_catch_the_feedbacks_state_and_emit_the_expectedMediatorValue() {
+        let expectedValue = Int.random(in: 1...1_000_000)
+
+        // Given: a mediator that handles Integer values
+        // Given: a System that is attached to this mediator and propagates a new value when the state is MockStateA
+        let mediator = CurrentValueMediator<Int>(-1)
+        let sut = System {
+            InitialState {
+                MockStateA(value: 1)
+            }
+
+            Feedbacks {
+                Feedback { _ in Empty().eraseToAnyPublisher() }
+            }
+
+            Transitions {
+                Transition(from: MockStateA.self, on: MockNextEvent.self, then: MockStateB(value: 2))
+            }
+        }
+        .attach(to: mediator,
+                onSystemState: MockStateA(value: expectedValue),
+                emitMediatorValue: expectedValue)
+        .execute(on: DispatchQueue.immediateScheduler)
+
+        let inputStateSubject = PassthroughSubject<State, Never>()
+
+        // When: executing the last added feedback to the system
+        let cancellable = sut
+            .feedbacks
+            .feedbacks
+            .last!
+            .sideEffect(inputStateSubject.eraseToAnyPublisher())
+            .sink(receiveCompletion: { _ in }, receiveValue: { _ in })
+
+        // When: the system's state is MockStateB
+        inputStateSubject.send(MockStateB(value: 1))
+        // Then: no value is propagated to the mediator
+        XCTAssertEqual(mediator.value, -1)
+
+        // When: the system's state is MockStateA
+        inputStateSubject.send(MockStateA(value: expectedValue))
+        // Then: the expected value is propagated to the mediator
+        XCTAssertEqual(mediator.value, expectedValue)
+
+        // When: the system's state is MockStateB
+        inputStateSubject.send(MockStateB(value: 2))
+        // Then: no value is propagated to the mediator
+        XCTAssertEqual(mediator.value, expectedValue)
+
+        cancellable.cancel()
+    }
+
+    func test() {
+        let randomValue = Int.random(in: 1...1_000_000)
+
+        let expectedEventB = MockEventA(value: randomValue)
+        var receivedEventB: Event?
+
+        let sutAInputEventStream = PassthroughSubject<Event, Never>()
+
+        // Given: 2 attached systems, from MockStateB state type to MockEventA event
+        let sutA = System {
+            InitialState {
+                MockStateA(value: 1)
+            }
+
+            Feedbacks {
+                Feedback { _ -> AnyPublisher<Event, Never> in
+                    sutAInputEventStream.eraseToAnyPublisher()
+                }
+            }
+
+            Transitions {
+                Transition(from: MockStateA.self, on: MockNextEvent.self, then: MockStateB(value: randomValue))
+            }
+        }
+        .execute(on: DispatchQueue.immediateScheduler)
+
+        let sutB = System {
+            InitialState {
+                MockStateA(value: 1)
+            }
+
+            Feedbacks {}
+                .onEventEmitted { receivedEventB = $0 }
+
+            Transitions {}
+        }
+        .execute(on: DispatchQueue.immediateScheduler)
+
+        let (newSutA, newSutB) = sutA.attach(to: sutB,
+                                             onSystemStateType: MockStateB.self,
+                                             emitAttachedSystemEvent: { mockStateB in
+                                                MockEventA(value: mockStateB.value)
+                                             })
+
+        newSutA.run()
+        newSutB.run()
+
+        // when: making the state of the first system be MockStateB
+        sutAInputEventStream.send(MockNextEvent())
+
+        // Then: MockEventA is triggered in the attached System
+        XCTAssertEqual(receivedEventB as? MockEventA, expectedEventB)
     }
     
     func testUISystem_provide_a_decorator() {
