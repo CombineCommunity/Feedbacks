@@ -678,7 +678,7 @@ final class SystemTests: XCTestCase {
         cancellable.cancel()
     }
 
-    func test() {
+    func testAttach_emit_event_in_another_system_when_state_is_expected() {
         let randomValue = Int.random(in: 1...1_000_000)
 
         let expectedEventB = MockEventA(value: randomValue)
