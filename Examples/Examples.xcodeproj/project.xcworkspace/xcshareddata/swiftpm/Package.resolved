@@ -1,0 +1,16 @@
+{
+  "object": {
+    "pins": [
+      {
+        "package": "Feedbacks",
+        "repositoryURL": "git@github.com:twittemb/Feedbacks.git",
+        "state": {
+          "branch": "feature/examples-app",
+          "revision": "90db6263da71dc65d89fbacfe580e14e16c10cc5",
+          "version": null
+        }
+      }
+    ]
+  },
+  "version": 1
+}

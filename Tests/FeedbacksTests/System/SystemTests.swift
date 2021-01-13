@@ -281,10 +281,12 @@ final class SystemTests: XCTestCase {
         .execute(on: DispatchQueue.immediateScheduler)
 
         // When: running it
-        sut.run()
+        let newSystem = sut.run()
 
         // Then: the system is started
         XCTAssertTrue(streamIsStarted)
+        // Then: the returned system is the original one
+        XCTAssert(newSystem === sut)
     }
     
     func testAttach_catch_the_mediator_value_when_closure_and_emit_the_expectedEvent() {
