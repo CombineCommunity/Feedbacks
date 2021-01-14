@@ -718,14 +718,14 @@ final class SystemTests: XCTestCase {
         }
         .execute(on: DispatchQueue.immediateScheduler)
 
-        let (newSutA, newSutB) = sutA.attach(to: sutB,
-                                             onSystemStateType: MockStateB.self,
-                                             emitAttachedSystemEvent: { mockStateB in
-                                                MockEventA(value: mockStateB.value)
-                                             })
+        sutA.attach(to: sutB,
+                    onSystemStateType: MockStateB.self,
+                    emitAttachedSystemEvent: { mockStateB in
+                        MockEventA(value: mockStateB.value)
+                    })
 
-        newSutA.run()
-        newSutB.run()
+        sutA.run()
+        sutB.run()
 
         // when: making the state of the first system be MockStateB
         sutAInputEventStream.send(MockNextEvent())
