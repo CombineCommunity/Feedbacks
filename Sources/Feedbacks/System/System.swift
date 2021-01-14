@@ -225,25 +225,28 @@ public extension System {
     ///   - attachedSystem: the System to attach
     ///   - onSystemStateType: the State type that should trigger the attached System event
     ///   - emitAttachedSystemEvent: the attached System event to emit when the State type is the expected one
-    /// - Returns: both Systems
+    /// - Returns: the  system attached to another one
+    @discardableResult
     func attach<SystemStateType: State, AttachedSystemEventType: Event>(
         to attachedSystem: System,
         onSystemStateType: SystemStateType.Type,
-        emitAttachedSystemEvent: @escaping (SystemStateType) -> AttachedSystemEventType) -> (System, System) {
+        emitAttachedSystemEvent: @escaping (SystemStateType) -> AttachedSystemEventType) -> System {
         let mediatorValue = UUID().uuidString
         let mediator = PassthroughMediator<String>()
         var mySystemState: SystemStateType?
-        let newSystem = self.attach(to: mediator, onSystemStateType: onSystemStateType, emitMediatorValue: { state in
+
+        _ = self.attach(to: mediator, onSystemStateType: onSystemStateType, emitMediatorValue: { state in
             mySystemState = state
             return mediatorValue
         })
-        let newAttachedSystem = attachedSystem.attach(to: mediator) { value -> Event? in
+
+        _ = attachedSystem.attach(to: mediator) { value -> Event? in
             guard value == mediatorValue else { return nil }
             guard let systemState = mySystemState else { return nil }
             return emitAttachedSystemEvent(systemState)
         }
 
-        return (newSystem, newAttachedSystem)
+        return self
     }
 
     /// Creates a UISystem based on the current System. It will add UI dedicated feedbacks so the user can interact with the System.
