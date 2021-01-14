@@ -76,8 +76,10 @@ public extension System {
 
     /// Subscribes to the state stream and store the cancellable in the System.
     /// The subscription will be canceled once the System is deinit.
-    func run() {
+    @discardableResult
+    func run() -> Self {
         self.stream.sink(receiveValue: { _ in }).store(in: &self.subscriptions)
+        return self
     }
 }
 
