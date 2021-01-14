@@ -444,4 +444,4 @@ class FeatureViewController: ViewController {
 
 # Examples
 
-Demo application in progress...
+You will find a demo application in the Examples folder of the project. We will add new examples of the time goes by.
