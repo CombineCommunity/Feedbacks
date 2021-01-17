@@ -23,10 +23,10 @@ extension CounterApp.System {
             Feedback(strategy: .cancelOnNewState, sideEffect: CounterApp.SideEffects.increaseEffect(state:))
         }
         .onStateReceived {
-            print("New state has been received: \($0)")
+            print("Counter: New state has been received: \($0)")
         }
         .onEventEmitted {
-            print("New event has been triggered: \($0)")
+            print("Counter: New event has been triggered: \($0)")
         }
 
         Transitions {

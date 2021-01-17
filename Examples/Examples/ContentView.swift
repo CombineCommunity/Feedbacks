@@ -20,6 +20,16 @@ struct ContentView: View {
                     label: {
                         Text("Counter Application")
                     })
+
+                NavigationLink(
+                    destination: GifList.RootView(
+                        system: GifList.System.make()
+                            .uiSystem(viewStateFactory: GifList.ViewState.stateToViewState(state:))
+                            .run()
+                    ),
+                    label: {
+                        Text("Giphy Trends Application")
+                    })
             }
             .navigationBarTitle("Examples")
         }
