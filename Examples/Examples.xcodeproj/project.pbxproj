@@ -25,6 +25,17 @@
 		742FEE6325B3CED500575CB2 /* GifList+RowView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 742FEE6225B3CED500575CB2 /* GifList+RowView.swift */; };
 		742FEE6925B3D02500575CB2 /* ActivityIndicatorView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 742FEE6825B3D02500575CB2 /* ActivityIndicatorView.swift */; };
 		742FEE6C25B3D58300575CB2 /* Encodable+Dictionary.swift in Sources */ = {isa = PBXBuildFile; fileRef = 742FEE6B25B3D58300575CB2 /* Encodable+Dictionary.swift */; };
+		742FEE7325B4F65300575CB2 /* GifDetail.swift in Sources */ = {isa = PBXBuildFile; fileRef = 742FEE7225B4F65300575CB2 /* GifDetail.swift */; };
+		742FEE7725B506E700575CB2 /* GifDetail+States.swift in Sources */ = {isa = PBXBuildFile; fileRef = 742FEE7625B506E700575CB2 /* GifDetail+States.swift */; };
+		742FEE7A25B508FC00575CB2 /* GifDetail+Events.swift in Sources */ = {isa = PBXBuildFile; fileRef = 742FEE7925B508FC00575CB2 /* GifDetail+Events.swift */; };
+		742FEE7E25B50A7C00575CB2 /* GifDetail+Transitions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 742FEE7D25B50A7C00575CB2 /* GifDetail+Transitions.swift */; };
+		742FEE8225B50A9000575CB2 /* Images.swift in Sources */ = {isa = PBXBuildFile; fileRef = 742FEE8025B50A9000575CB2 /* Images.swift */; };
+		742FEE8325B50A9000575CB2 /* Gif.swift in Sources */ = {isa = PBXBuildFile; fileRef = 742FEE8125B50A9000575CB2 /* Gif.swift */; };
+		742FEE8725B50CCA00575CB2 /* GifDetail+SideEffects.swift in Sources */ = {isa = PBXBuildFile; fileRef = 742FEE8625B50CCA00575CB2 /* GifDetail+SideEffects.swift */; };
+		742FEE8C25B5260E00575CB2 /* GifDetailRequestParameter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 742FEE8A25B5260D00575CB2 /* GifDetailRequestParameter.swift */; };
+		742FEE8D25B5260E00575CB2 /* GifDetailResponse.swift in Sources */ = {isa = PBXBuildFile; fileRef = 742FEE8B25B5260D00575CB2 /* GifDetailResponse.swift */; };
+		742FEE9225B526EB00575CB2 /* GifDetail+System.swift in Sources */ = {isa = PBXBuildFile; fileRef = 742FEE9125B526EB00575CB2 /* GifDetail+System.swift */; };
+		742FEE9725B52D2D00575CB2 /* GifDetail+RootView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 742FEE9625B52D2C00575CB2 /* GifDetail+RootView.swift */; };
 		747182A425AE7B0B0098E83E /* ExamplesApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 747182A325AE7B0B0098E83E /* ExamplesApp.swift */; };
 		747182A625AE7B0B0098E83E /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 747182A525AE7B0B0098E83E /* ContentView.swift */; };
 		747182A825AE7B0E0098E83E /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 747182A725AE7B0E0098E83E /* Assets.xcassets */; };
@@ -38,6 +49,7 @@
 		747182CF25AE85B40098E83E /* SideEffects.swift in Sources */ = {isa = PBXBuildFile; fileRef = 747182CE25AE85B40098E83E /* SideEffects.swift */; };
 		747182D425AE878D0098E83E /* System.swift in Sources */ = {isa = PBXBuildFile; fileRef = 747182D325AE878D0098E83E /* System.swift */; };
 		747182DC25AE8B260098E83E /* ViewState.swift in Sources */ = {isa = PBXBuildFile; fileRef = 747182DB25AE8B250098E83E /* ViewState.swift */; };
+		74EAB46C25B7BF0A003283E4 /* GifDetail+ViewState.swift in Sources */ = {isa = PBXBuildFile; fileRef = 74EAB46B25B7BF0A003283E4 /* GifDetail+ViewState.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -59,6 +71,17 @@
 		742FEE6225B3CED500575CB2 /* GifList+RowView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "GifList+RowView.swift"; sourceTree = "<group>"; };
 		742FEE6825B3D02500575CB2 /* ActivityIndicatorView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ActivityIndicatorView.swift; sourceTree = "<group>"; };
 		742FEE6B25B3D58300575CB2 /* Encodable+Dictionary.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "Encodable+Dictionary.swift"; sourceTree = "<group>"; };
+		742FEE7225B4F65300575CB2 /* GifDetail.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GifDetail.swift; sourceTree = "<group>"; };
+		742FEE7625B506E700575CB2 /* GifDetail+States.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "GifDetail+States.swift"; sourceTree = "<group>"; };
+		742FEE7925B508FC00575CB2 /* GifDetail+Events.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "GifDetail+Events.swift"; sourceTree = "<group>"; };
+		742FEE7D25B50A7C00575CB2 /* GifDetail+Transitions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "GifDetail+Transitions.swift"; sourceTree = "<group>"; };
+		742FEE8025B50A9000575CB2 /* Images.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Images.swift; sourceTree = "<group>"; };
+		742FEE8125B50A9000575CB2 /* Gif.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Gif.swift; sourceTree = "<group>"; };
+		742FEE8625B50CCA00575CB2 /* GifDetail+SideEffects.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "GifDetail+SideEffects.swift"; sourceTree = "<group>"; };
+		742FEE8A25B5260D00575CB2 /* GifDetailRequestParameter.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = GifDetailRequestParameter.swift; sourceTree = "<group>"; };
+		742FEE8B25B5260D00575CB2 /* GifDetailResponse.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = GifDetailResponse.swift; sourceTree = "<group>"; };
+		742FEE9125B526EB00575CB2 /* GifDetail+System.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "GifDetail+System.swift"; sourceTree = "<group>"; };
+		742FEE9625B52D2C00575CB2 /* GifDetail+RootView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "GifDetail+RootView.swift"; sourceTree = "<group>"; };
 		747182A025AE7B0B0098E83E /* Examples.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Examples.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		747182A325AE7B0B0098E83E /* ExamplesApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ExamplesApp.swift; sourceTree = "<group>"; };
 		747182A525AE7B0B0098E83E /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
@@ -73,6 +96,7 @@
 		747182CE25AE85B40098E83E /* SideEffects.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SideEffects.swift; sourceTree = "<group>"; };
 		747182D325AE878D0098E83E /* System.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = System.swift; sourceTree = "<group>"; };
 		747182DB25AE8B250098E83E /* ViewState.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ViewState.swift; sourceTree = "<group>"; };
+		74EAB46B25B7BF0A003283E4 /* GifDetail+ViewState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "GifDetail+ViewState.swift"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -111,6 +135,9 @@
 		742FEE2025B3877D00575CB2 /* GifDetail */ = {
 			isa = PBXGroup;
 			children = (
+				742FEE7025B4F64000575CB2 /* System */,
+				742FEE7125B4F64500575CB2 /* Views */,
+				742FEE7225B4F65300575CB2 /* GifDetail.swift */,
 			);
 			path = GifDetail;
 			sourceTree = "<group>";
@@ -148,7 +175,9 @@
 		742FEE2C25B38EE600575CB2 /* Domain */ = {
 			isa = PBXGroup;
 			children = (
+				742FEE8125B50A9000575CB2 /* Gif.swift */,
 				742FEE2D25B38EEE00575CB2 /* GifOverview.swift */,
+				742FEE8025B50A9000575CB2 /* Images.swift */,
 				742FEE5625B3CB6000575CB2 /* Meta.swift */,
 				742FEE5525B3CB6000575CB2 /* Pagination.swift */,
 			);
@@ -167,6 +196,8 @@
 		742FEE4D25B3B41900575CB2 /* Api */ = {
 			isa = PBXGroup;
 			children = (
+				742FEE8A25B5260D00575CB2 /* GifDetailRequestParameter.swift */,
+				742FEE8B25B5260D00575CB2 /* GifDetailResponse.swift */,
 				742FEE4E25B3B42D00575CB2 /* GifListRequestParameter.swift */,
 				742FEE4F25B3B42D00575CB2 /* GifListResponse.swift */,
 			);
@@ -190,6 +221,27 @@
 				742FEE6B25B3D58300575CB2 /* Encodable+Dictionary.swift */,
 			);
 			path = Tools;
+			sourceTree = "<group>";
+		};
+		742FEE7025B4F64000575CB2 /* System */ = {
+			isa = PBXGroup;
+			children = (
+				742FEE7925B508FC00575CB2 /* GifDetail+Events.swift */,
+				742FEE8625B50CCA00575CB2 /* GifDetail+SideEffects.swift */,
+				742FEE7625B506E700575CB2 /* GifDetail+States.swift */,
+				742FEE9125B526EB00575CB2 /* GifDetail+System.swift */,
+				742FEE7D25B50A7C00575CB2 /* GifDetail+Transitions.swift */,
+			);
+			path = System;
+			sourceTree = "<group>";
+		};
+		742FEE7125B4F64500575CB2 /* Views */ = {
+			isa = PBXGroup;
+			children = (
+				742FEE9625B52D2C00575CB2 /* GifDetail+RootView.swift */,
+				74EAB46B25B7BF0A003283E4 /* GifDetail+ViewState.swift */,
+			);
+			path = Views;
 			sourceTree = "<group>";
 		};
 		7471829725AE7B0B0098E83E = {
@@ -339,27 +391,39 @@
 				747182C925AE82640098E83E /* CounterApp.swift in Sources */,
 				742FEE3125B38F5300575CB2 /* GifList+Events.swift in Sources */,
 				747182C625AE81180098E83E /* States.swift in Sources */,
+				742FEE8725B50CCA00575CB2 /* GifDetail+SideEffects.swift in Sources */,
+				742FEE9725B52D2D00575CB2 /* GifDetail+RootView.swift in Sources */,
 				742FEE2425B388DA00575CB2 /* GifList.swift in Sources */,
 				742FEE4725B3AC3600575CB2 /* HTTPService.swift in Sources */,
 				747182DC25AE8B260098E83E /* ViewState.swift in Sources */,
 				742FEE2825B38B1A00575CB2 /* GifList+States.swift in Sources */,
 				742FEE5725B3CB6000575CB2 /* Pagination.swift in Sources */,
+				742FEE7E25B50A7C00575CB2 /* GifDetail+Transitions.swift in Sources */,
 				742FEE6325B3CED500575CB2 /* GifList+RowView.swift in Sources */,
 				742FEE3925B3978600575CB2 /* GifList+SideEffects.swift in Sources */,
 				747182CF25AE85B40098E83E /* SideEffects.swift in Sources */,
+				742FEE9225B526EB00575CB2 /* GifDetail+System.swift in Sources */,
 				747182C225AE80DC0098E83E /* Events.swift in Sources */,
 				742FEE2E25B38EEE00575CB2 /* GifOverview.swift in Sources */,
 				747182BA25AE80360098E83E /* CounterHomeView.swift in Sources */,
 				742FEE6025B3CC8800575CB2 /* GifList+ViewState.swift in Sources */,
 				742FEE6925B3D02500575CB2 /* ActivityIndicatorView.swift in Sources */,
+				742FEE7A25B508FC00575CB2 /* GifDetail+Events.swift in Sources */,
 				742FEE5C25B3CC7200575CB2 /* GifList+RootView.swift in Sources */,
 				742FEE5025B3B42D00575CB2 /* GifListRequestParameter.swift in Sources */,
 				747182CC25AE830E0098E83E /* Transitions.swift in Sources */,
 				742FEE6C25B3D58300575CB2 /* Encodable+Dictionary.swift in Sources */,
+				742FEE7325B4F65300575CB2 /* GifDetail.swift in Sources */,
+				742FEE8D25B5260E00575CB2 /* GifDetailResponse.swift in Sources */,
+				742FEE8C25B5260E00575CB2 /* GifDetailRequestParameter.swift in Sources */,
+				74EAB46C25B7BF0A003283E4 /* GifDetail+ViewState.swift in Sources */,
+				742FEE7725B506E700575CB2 /* GifDetail+States.swift in Sources */,
 				742FEE4325B3AA2500575CB2 /* StorageService.swift in Sources */,
+				742FEE8225B50A9000575CB2 /* Images.swift in Sources */,
 				747182A625AE7B0B0098E83E /* ContentView.swift in Sources */,
 				747182D425AE878D0098E83E /* System.swift in Sources */,
 				742FEE5825B3CB6000575CB2 /* Meta.swift in Sources */,
+				742FEE8325B50A9000575CB2 /* Gif.swift in Sources */,
 				742FEE4B25B3B3A200575CB2 /* GifList+System.swift in Sources */,
 				742FEE5125B3B42D00575CB2 /* GifListResponse.swift in Sources */,
 				742FEE3525B390C600575CB2 /* GifList+Transitions.swift in Sources */,

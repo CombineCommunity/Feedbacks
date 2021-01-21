@@ -31,7 +31,6 @@ extension GifList.SideEffects {
                                                  currentPage: state.page,
                                                  totalPage: totalPage)
             }
-            .handleEvents(receiveCompletion: { print("load completion: \($0)") })
             .replaceError(with: GifList.Events.LoadingHasFailed())
             .eraseToAnyPublisher()
     }

@@ -13,22 +13,19 @@ extension CounterApp {
 }
 
 extension CounterApp.Transitions {
-    @TransitionsBuilder
-    static var fixedTransitions: Transitions {
+    static let fixedTransitions = Transitions {
         Transition(from: CounterApp.States.Fixed.self, on: CounterApp.Events.TogglePause.self) { state, _ -> State in
             CounterApp.States.Decreasing(value: state.value, isPaused: false)
         }
     }
 
-    @TransitionsBuilder
-    static var resetTransitions: Transitions {
+    static let resetTransitions = Transitions {
         Transition(from: AnyState.self, on: CounterApp.Events.Reset.self) { _, event -> State in
             CounterApp.States.Fixed(value: event.value)
         }
     }
 
-    @TransitionsBuilder
-    static var decreasingTransitions: Transitions {
+    static let decreasingTransitions = Transitions {
         Transition(from: CounterApp.States.Decreasing.self, on: CounterApp.Events.TogglePause.self) { state, _ -> State in
             CounterApp.States.Decreasing(value: state.value, isPaused: !state.isPaused)
         }
@@ -44,8 +41,7 @@ extension CounterApp.Transitions {
         }
     }
 
-    @TransitionsBuilder
-    static var increasingTransitions: Transitions {
+    static let increasingTransitions = Transitions {
         Transition(from: CounterApp.States.Increasing.self, on: CounterApp.Events.TogglePause.self) { state, _ -> State in
             CounterApp.States.Increasing(value: state.value, isPaused: !state.isPaused)
         }

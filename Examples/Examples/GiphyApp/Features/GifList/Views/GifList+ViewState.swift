@@ -14,7 +14,7 @@ extension GifList {
 extension GifList.ViewState {
     enum Value: State, CanBeUndefined, Equatable {
         case displayLoading
-        case displayLoaded(items: [GifList.ViewState.Item], hasPrevious: Bool, hasNext: Bool)
+        case displayLoaded(items: [GifList.ViewState.Item], hasPrevious: Bool, hasNext: Bool, counter: String)
         case displayError
 
         static let undefined: GifList.ViewState.Value = .displayLoading
@@ -33,7 +33,8 @@ extension GifList.ViewState {
                                                                                                                              title: $0.title,
                                                                                                                              isFavorite: $1) },
                                                                                                hasPrevious: loaded.currentPage > 0,
-                                                                                               hasNext: loaded.currentPage < loaded.totalPage)
+                                                                                               hasNext: loaded.currentPage < loaded.totalPage,
+                                                                                               counter: "\(loaded.currentPage + 1) / \(loaded.totalPage)")
         case is GifList.States.Failed: return GifList.ViewState.Value.displayError
         default: return .undefined
         }

@@ -7,6 +7,7 @@
 
 import Combine
 import Feedbacks
+import Foundation
 
 extension GifList {
     enum System {}
@@ -21,7 +22,8 @@ extension GifList.System {
 
             let parameter = GifListRequestParameter(apiKey: apiKey, limit: pageSize, offset: pageSize * page)
             guard let urlRequest = HTTPService.makeURLEncodedRequest(method: "GET",
-                                                                     baseUrl: baseUrl, path: "/v1/gifs/trending",
+                                                                     baseUrl: baseUrl,
+                                                                     path: "/v1/gifs/trending",
                                                                      parameter: parameter) else {
                 return Fail(error: HTTPService.HTTPError()).eraseToAnyPublisher()
             }
@@ -54,6 +56,7 @@ extension GifList.System {
 
             Feedbacks {
                 Feedback(strategy: .cancelOnNewState, sideEffect: loadSideEffect)
+                    .execute(on: DispatchQueue(label: "Load Gifs Queue"))
             }
             .onStateReceived {
                 print("GifList: New state has been received: \($0)")

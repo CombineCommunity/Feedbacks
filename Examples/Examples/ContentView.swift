@@ -11,27 +11,20 @@ struct ContentView: View {
     var body: some View {
         NavigationView {
             List {
-                NavigationLink(
-                    destination: CounterHomeView(
-                        system: CounterApp.System.counter
-                            .uiSystem(viewStateFactory: CounterApp.ViewState.stateToViewState(state:))
-                            .run()
-                    ),
-                    label: {
-                        Text("Counter Application")
-                    })
+                NavigationLink("Counter Application",
+                               destination: CounterHomeView(
+                                system: CounterApp.System.counter
+                                    .uiSystem(viewStateFactory: CounterApp.ViewState.stateToViewState(state:))
+                                    .run()
+                               ))
 
-                NavigationLink(
-                    destination: GifList.RootView(
-                        system: GifList.System.make()
-                            .uiSystem(viewStateFactory: GifList.ViewState.stateToViewState(state:))
-                            .run()
-                    ),
-                    label: {
-                        Text("Giphy Trends Application")
-                    })
-            }
-            .navigationBarTitle("Examples")
+                NavigationLink("Giphy Trends Application",
+                               destination: GifList.RootView(
+                                system: GifList.System.make()
+                                    .uiSystem(viewStateFactory: GifList.ViewState.stateToViewState(state:))
+                                    .run()
+                               ))
+            }.navigationTitle("Examples")
         }
     }
 }

@@ -23,6 +23,7 @@ class StorageService {
 
     func store(key: String, value: Any) {
         syncQueue.sync { [unowned self] in
+            sleep(1)
             self.storage[key] = value
         }
     }
