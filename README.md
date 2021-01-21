@@ -4,6 +4,10 @@
  ![platforms](https://img.shields.io/badge/platforms-iOS%20%7C%20macOS%20%7C%20tvOS%20%7C%20watchOS-333333.svg)
 [![codecov](https://codecov.io/gh/twittemb/Feedbacks/branch/main/graph/badge.svg)](https://codecov.io/gh/twittemb/Feedbacks)
 
+<div style="text-align:center">
+<img src="./Resources/logo_feedbacks_black.png" height="300" style="border-radius: 20px;"/>
+</div>
+
 # About
 
 **Feedbacks is a tool to help you build reliable and composable features inside Swift applications. Each feature is based on a System, which stands for all the needed software components that communicate together to perform this feature.**
@@ -68,7 +72,7 @@ Let's break it down.
 
 > A state machine is an abstract machine that can be in exactly one of a finite number of states at any given time. The state machine can change from one state to another in response to some external events. The change from one state to another is called a transition. A state machine is defined by a list of its states, its initial state, and the conditions for each transition.
 
-A state machine can perfectly describe a feature inside an application. What is great about state machines is there predictability. From a given state and a given event, a transition will always return the same state.
+A state machine can perfectly describe a feature inside an application. What is great about state machines is their predictability. From a given state and a given event, a transition will always return the same state.
 
 To define a state machine, we need to define three things: the states, the events and the transitions. In the "speaker volume example", we have defined 1 state: the current volume, and 2 events: 1 for increasing the volume, and 1 for decreasing it. All you have to do is then to describe the transitions and the condition of their execution.
 
@@ -78,7 +82,7 @@ Here is the state machine described in the aforementioned System.
 <img src="./Resources/state_machine.png" height="250" style="border-radius: 20px;"/>
 </div>
 
-On the one hand, defining transitions is about describing what is immutable in an application, what cannot change depending on external conditions, what is highly predictible and testable.
+On the one hand, defining transitions is about describing what is immutable in an application, what cannot change depending on external conditions, what is highly predictable and testable.
 
 On the other hand, an application often needs to access data from the network or a database, which depends on conditions that are outside the System (filesystem, data availability, ...). Those side effects can be defined inside Feedbacks.
 
