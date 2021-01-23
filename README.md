@@ -275,14 +275,12 @@ let transitions = Transitions {
 or even externalize them into properties:
 
 ```swift
-@TransitionsBuilder
-var loadingTransitions: Transitions {
+let loadingTransitions = Transitions {
     Transition(from: LoadingState.self, on: DataIsLoaded.self, then: LoadedState())
     Transition(from: LoadingState.self, on: LoadingHasFailed.self, then: ErrorState())
 }
 
-@TransitionsBuilder
-var loadedTransitions: Transitions {
+let loadedTransitions = Transitions {
     Transition(from: LoadedState.self, on: RefreshEvent.self, then: LoadingState())
 }
 
@@ -329,7 +327,7 @@ let systemB = System {
 	...
 }
 
-let (attachedSystemA, attachedSystemB) = systemA.attach(
+systemA.attach(
 		to: systemB,
 		onSystemStateType: LoadedState.self,
 		emitAttachedSystemEvent: { stateFromA in
@@ -448,4 +446,4 @@ class FeatureViewController: ViewController {
 
 # Examples
 
-You will find a demo application in the Examples folder of the project. We will add new examples of the time goes by.
+You will find a demo application in the Examples folder of the project. We will add new examples as the time goes by.
