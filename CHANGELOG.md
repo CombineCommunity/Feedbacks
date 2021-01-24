@@ -1,4 +1,4 @@
-**vx.y.z:**
+**v0.2.0 - Sidious:**
 
 - Improve Readme / Logo
 - Add CounterApp and GiphyApp examples
