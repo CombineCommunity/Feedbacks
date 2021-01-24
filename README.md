@@ -346,7 +346,7 @@ Fortunately, taking a State as an input for rendering and returning a stream of 
 
 `UISystem` has some specifics:
 
-* it takes a function as a parameter to map a State to a View State adapted for rendering
+* it takes a function as a parameter to map a State to a View State adapted for rendering. This function should be a pure function that garantees its reproducibility 
 * as it is an ObservableObject, it publishes a `View State` we can listen to in SwiftUI views or UIKit ViewControllers
 * it ensures the `View State` is published on the main thread
 * it offers an `emit(event:)` function to propagate user events in the System
