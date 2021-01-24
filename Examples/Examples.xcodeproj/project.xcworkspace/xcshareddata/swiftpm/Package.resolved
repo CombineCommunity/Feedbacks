@@ -5,9 +5,9 @@
         "package": "Feedbacks",
         "repositoryURL": "git@github.com:twittemb/Feedbacks.git",
         "state": {
-          "branch": "main",
-          "revision": "797311537dde420c88404bd422e824055e9e2a77",
-          "version": null
+          "branch": null,
+          "revision": "694b3e4f52e6a551703dd3ff595d1f046acbfcce",
+          "version": "0.2.0"
         }
       }
     ]
