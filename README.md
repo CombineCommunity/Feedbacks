@@ -257,7 +257,7 @@ This Feedback will execute the side effect only when it is of type LoadingState.
 
 ## Composing Transitions
 
-The more complex a System, the more description required for the transitions. It's a good practice to split them into logical units:
+The more complex a System, the more we need to add transitions. It's a good practice to split them into logical units:
 
 ```swift
 let transitions = Transitions {
