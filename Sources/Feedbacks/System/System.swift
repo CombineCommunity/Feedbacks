@@ -231,19 +231,14 @@ public extension System {
         to attachedSystem: System,
         onSystemStateType: SystemStateType.Type,
         emitAttachedSystemEvent: @escaping (SystemStateType) -> AttachedSystemEventType) -> System {
-        let mediatorValue = UUID().uuidString
-        let mediator = PassthroughMediator<String>()
-        var mySystemState: SystemStateType?
+        let mediator = PassthroughMediator<SystemStateType>()
 
         _ = self.attach(to: mediator, onSystemStateType: onSystemStateType, emitMediatorValue: { state in
-            mySystemState = state
-            return mediatorValue
+            return state
         })
 
         _ = attachedSystem.attach(to: mediator) { value -> Event? in
-            guard value == mediatorValue else { return nil }
-            guard let systemState = mySystemState else { return nil }
-            return emitAttachedSystemEvent(systemState)
+            return emitAttachedSystemEvent(value)
         }
 
         return self
