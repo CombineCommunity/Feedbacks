@@ -13,7 +13,7 @@ extension CounterApp {
 }
 
 extension CounterApp.System {
-    static let counter = System {
+    static let counter = UISystem {
         InitialState {
             CounterApp.States.Fixed(value: 10)
         }
@@ -30,8 +30,8 @@ extension CounterApp.System {
         }
 
         Transitions {
-            CounterApp.Transitions.fixedTransitions
-            CounterApp.Transitions.resetTransitions
+            CounterApp.Transitions.fixedTransition
+            CounterApp.Transitions.resetTransition
             CounterApp.Transitions.decreasingTransitions
             CounterApp.Transitions.increasingTransitions
         }

@@ -22,6 +22,8 @@ public class System {
 
     private var subscriptions = [AnyCancellable]()
 
+    static let defaultQueue = DispatchQueue(label: "Feedbacks.System.\(UUID().uuidString)")
+
     /// Builds a System based on its three components: an initial state, some feedbacks, a state machine
     /// By default, the System will be executed an a serial background queue. This can be altered thanks to the `.execute(on:)` modifier.
     /// - Parameter components: the three components of the System
@@ -30,22 +32,22 @@ public class System {
         self.init(initialState: initialState,
                   feedbacks: feedbacks,
                   transitions: transitions,
-                  scheduler: DispatchQueue(label: "Feedbacks.System.\(UUID().uuidString)"))
+                  scheduledStream: { (events: AnyPublisher<Event, Never>) in
+                    events
+                        .subscribe(on: System.defaultQueue)
+                        .receive(on: System.defaultQueue)
+                        .eraseToAnyPublisher()
+                  })
     }
 
-    init<SchedulerType: Scheduler>(initialState: InitialState,
-                                   feedbacks: Feedbacks,
-                                   transitions: Transitions,
-                                   scheduler: SchedulerType) {
+    init(initialState: InitialState,
+         feedbacks: Feedbacks,
+         transitions: Transitions,
+         scheduledStream: @escaping (AnyPublisher<Event, Never>) -> AnyPublisher<Event, Never>) {
         self.initialState = initialState
         self.feedbacks = feedbacks
         self.transitions = transitions
-        self.scheduledStream = { (events: AnyPublisher<Event, Never>) in
-            events
-                .subscribe(on: scheduler)
-                .receive(on: scheduler)
-                .eraseToAnyPublisher()
-        }
+        self.scheduledStream = scheduledStream
     }
 
     static func decode(builder system: () -> (InitialState, Feedbacks, Transitions)) -> (InitialState, Feedbacks, Transitions) {
@@ -243,14 +245,6 @@ public extension System {
 
         return self
     }
-
-    /// Creates a UISystem based on the current System. It will add UI dedicated feedbacks so the user can interact with the System.
-    /// The UISystem will publish a View State, based on the System's state and a View State factory function.
-    /// - Parameter viewStateFactory: the View State factory function to apply to the System's state
-    /// - Returns: The UISystem
-    func uiSystem<ViewState: State>(viewStateFactory: @escaping (State) -> ViewState) -> UISystem<ViewState> {
-        UISystem(system: self, viewStateFactory: viewStateFactory)
-    }
 }
 
 @_functionBuilder
@@ -261,5 +255,17 @@ public struct SystemBuilder {
         _ transitions: Transitions
     ) -> (InitialState, Feedbacks, Transitions) {
         (initialState, feedbacks, transitions)
+    }
+
+    public static func buildBlock(
+        _ initialState: InitialState,
+        _ feedbacks: Feedbacks,
+        _ transitions: Transitions
+    ) -> System {
+        System {
+            initialState
+            feedbacks
+            transitions
+        }
     }
 }
