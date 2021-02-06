@@ -15,42 +15,15 @@ extension GifDetail {
 
 extension GifDetail.System {
     static func make(id: String) -> System {
-        let loadGifFunction: () -> AnyPublisher<Gif, Swift.Error> = {
-            let apiKey = "f4HXQOslkXuDXgFlZQATpWXc8FtjhuUR"
-            let baseUrl = "api.giphy.com"
-            let parameter = GifDetailRequestParameter(apiKey: apiKey)
-            guard let urlRequest = HTTPService.makeURLEncodedRequest(method: "GET",
-                                                                     baseUrl: baseUrl,
-                                                                     path: "/v1/gifs/\(id)",
-                                                                     parameter: parameter) else {
-                return Fail(error: HTTPService.HTTPError()).eraseToAnyPublisher()
-            }
-
-            return HTTPService
-                .fetch(request: urlRequest)
-                .map { (response: GifDetailResponse) in
-                    response.data
-                }
-                .eraseToAnyPublisher()
-        }
-
-        let isFavoriteFunction: (Gif) -> Bool = { gif in
-            StorageService.instance.load(key: gif.id) ?? false
-        }
 
         let loadSideEffect = SideEffect.make(GifDetail.SideEffects.load(loadGifFunction:isFavoriteFunction:state:),
-                                             arg1: loadGifFunction,
-                                             arg2: isFavoriteFunction)
+                                             arg1: { GifDetail.Dependencies.loadGif(id: id) },
+                                             arg2: GifDetail.Dependencies.isFavorite(gif:))
 
-        let saveFavoriteFunction: (Gif, Bool) -> AnyPublisher<Void, Swift.Error> = { gif, isFavorite in
-            return Future { subscriber in
-                StorageService.instance.store(key: gif.id, value: isFavorite)
-                subscriber(.success(()))
-            }.eraseToAnyPublisher()
-        }
+
 
         let toggleFavoriteSideEffect = SideEffect.make(GifDetail.SideEffects.toggleFavorite(saveFavoriteFunction:state:),
-                                                       arg: saveFavoriteFunction)
+                                                       arg: GifDetail.Dependencies.saveFavorite(gif:isFavorite:))
 
         return System {
             InitialState {
@@ -73,7 +46,7 @@ extension GifDetail.System {
 
             Transitions {
                 GifDetail.Transitions.loadingTransitions
-                GifDetail.Transitions.loadedTransitions
+                GifDetail.Transitions.loadedTransition
                 GifDetail.Transitions.togglingTransitions
             }
         }

@@ -1,5 +1,5 @@
 //
-//  Transitions.swift
+//  CounterApp+Transitions.swift
 //  Examples
 //
 //  Created by Thibault Wittemberg on 2021-01-12.

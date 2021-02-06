@@ -12,7 +12,7 @@ extension GifList {
 }
 
 extension GifList.ViewState {
-    enum Value: State, CanBeUndefined, Equatable {
+    enum Value: ViewState {
         case displayLoading
         case displayLoaded(items: [GifList.ViewState.Item], hasPrevious: Bool, hasNext: Bool, counter: String)
         case displayError

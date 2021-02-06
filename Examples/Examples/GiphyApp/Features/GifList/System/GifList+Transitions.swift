@@ -39,7 +39,5 @@ extension GifList.Transitions {
         }
     }
 
-    static let failedTransitions = Transitions {
-        Transition(from: GifList.States.Failed.self, on: GifList.Events.Refresh.self, then: GifList.States.Loading())
-    }
+    static let failedTransition = Transition(from: GifList.States.Failed.self, on: GifList.Events.Refresh.self, then: GifList.States.Loading())
 }

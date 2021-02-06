@@ -1,5 +1,5 @@
 //
-//  System.swift
+//  CounterApp+System.swift
 //  Examples
 //
 //  Created by Thibault Wittemberg on 2021-01-12.
@@ -13,7 +13,7 @@ extension CounterApp {
 }
 
 extension CounterApp.System {
-    static let counter = UISystem {
+    static let counter = System {
         InitialState {
             CounterApp.States.Fixed(value: 10)
         }

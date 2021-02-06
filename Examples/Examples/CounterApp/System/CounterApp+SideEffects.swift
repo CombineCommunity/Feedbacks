@@ -1,5 +1,5 @@
 //
-//  SideEffects.swift
+//  CounterApp+SideEffects.swift
 //  Examples
 //
 //  Created by Thibault Wittemberg on 2021-01-12.

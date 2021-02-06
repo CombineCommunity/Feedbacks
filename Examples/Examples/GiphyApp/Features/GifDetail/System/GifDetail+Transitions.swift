@@ -20,10 +20,9 @@ extension GifDetail.Transitions {
         Transition(from: GifDetail.States.Loading.self, on: GifDetail.Events.LoadingHasFailed.self, then: GifDetail.States.Failed())
     }
 
-    static let loadedTransitions = Transitions {
-        Transition(from: GifDetail.States.Loaded.self, on: GifDetail.Events.ToggleFavorite.self) { state, _ in
-            GifDetail.States.TogglingFavorite(gif: state.gif, isFavorite: !state.isFavorite)
-        }
+    static let loadedTransition = Transition(from: GifDetail.States.Loaded.self,
+                                             on: GifDetail.Events.ToggleFavorite.self) { state, _ in
+        GifDetail.States.TogglingFavorite(gif: state.gif, isFavorite: !state.isFavorite)
     }
 
     static let togglingTransitions = Transitions {

@@ -1,5 +1,5 @@
 //
-//  Events.swift
+//  CounterApp+Events.swift
 //  Examples
 //
 //  Created by Thibault Wittemberg on 2021-01-12.

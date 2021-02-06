@@ -28,7 +28,7 @@ extension GifDetail.SideEffects {
             .eraseToAnyPublisher()
     }
 
-    static func toggleFavorite(saveFavoriteFunction: (Gif, Bool) -> AnyPublisher<Void, Swift.Error>,
+    static func toggleFavorite(saveFavoriteFunction: @escaping (Gif, Bool) -> AnyPublisher<Void, Swift.Error>,
                                state: GifDetail.States.TogglingFavorite) -> AnyPublisher<Event, Never> {
         return saveFavoriteFunction(state.gif, state.isFavorite)
             .map {
