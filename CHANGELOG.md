@@ -1,3 +1,7 @@
+**vx.y.z - Vader**:
+
+- UISystem: unify the UISystem concept for RawState and ViewState
+
 **v0.1.0 - Sidious:**
 
 - Transitions, Transition, Feedacks, Feedback and System initial functional version
