@@ -89,6 +89,7 @@ On the other hand, an application often needs to access data from the network or
 **We can sum up to this: everything that mutates a state that belongs to the System is a transition, everything that access a state outside the System is a side effect.**
 
 # The feedbacks
+A Feedback is a semantical wrapper around a side effect.
 
 In the "speaker volume example", at some point we need to access an external property: the targeted volume. It is external to the System because it is something variable that can be set and stored independently from the System. Its access has to be segregated inside a side effect.
 
