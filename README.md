@@ -20,7 +20,7 @@
 * some side effects
 * a state machine
 
-# An example is worth a thousand words
+# A prototype is worth a thousand pictures
 
 Here is a System that regulates the volume of a speaker based on an initial volume and a targeted volume.
 
@@ -342,13 +342,17 @@ When systemA encounters the state `LoadedState`, systemB will trigger a `LoadedE
 
 Although a System can exist by itself without a view, it makes sense in our developer world to treat it as a way to produce a State that will be rendered on screen and expect events emitted by a user.
 
-Fortunately, taking a State as an input for rendering and returning a stream of events from user interactions looks A LOT like the definition of a side effect; and we know how to handle them 😁 -- with a System of course. `UISystem` is a decoration of a traditionnal `System` dedicated to UI interactions.
+Fortunately, taking a State as an input for rendering and returning a stream of events from user interactions looks A LOT like the definition of a side effect; and we know how to handle them 😁 -- with a System of course. Feedbacks provides a `UISystem` class which is a decoration of a traditionnal `System`, but dedicated to UI interactions.
+
+Depending on the complexity of your use case, you can use `UISystem` in two ways:
+
+* for simple cases, you can instantiate a `UISystem` from a `System`: The resulting system will publish a `RawState`, which is a basic encapsulation of your states. You will have to write functions in your Views to extract the information you need from them. You can find an example of implementation in the [CounterApp demo application](https://github.com/CombineCommunity/Feedbacks/tree/main/Examples/Examples/CounterApp).
+* for more complex cases, you can instantiate a `UISystem` from a `System` and a `viewStateFactory` function: The resulting system will publish a `ViewState` which is the output from the `viewStateFactory` function. It allows to implement more complex mappings. You can find an example of implementation in the [GiphyApp demo application](https://github.com/CombineCommunity/Feedbacks/tree/main/Examples/Examples/GiphyApp).
 
 `UISystem` has some specifics:
 
-* it takes a function as a parameter to map a State to a View State adapted for rendering. This function should be a pure function that garantees its reproducibility 
-* as it is an ObservableObject, it publishes a `View State` we can listen to in SwiftUI views or UIKit ViewControllers
-* it ensures the `View State` is published on the main thread
+* it ensures the states are published on the main thread 
+* as it is an ObservableObject, it publishes a `state` property we can listen to in SwiftUI views or UIKit ViewControllers
 * it offers an `emit(event:)` function to propagate user events in the System
 * it offers some helper functions to build SwiftUI Bindings
 
@@ -397,15 +401,17 @@ let system = System {
     Transitions {
     	...
     }
-}.uiSystem(viewStateFactory: stateToViewState)
+}
+
+let uiSystem = system.uiSystem(viewStateFactory: stateToViewState)
 ```
 
-Once started, we can inject the `system` into a SwiftUI View:
+Once started, we can inject the `uiSystem` into a SwiftUI View:
 
 ```swift
 struct FeatureView: View {
 
-	@ObservedObject var system: System
+	@ObservedObject var system: UISystem<FeatureViewState>
 
 	var body: some View {
 		switch (self.system.state) {
