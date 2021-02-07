@@ -1,6 +1,7 @@
-**vx.y.z - Vader**:
+**v0.2.0 - Vader**:
 
 - UISystem: unify the UISystem concept for RawState and ViewState
+- Improve the README
 
 **v0.1.0 - Sidious:**
 
