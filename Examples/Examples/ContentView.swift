@@ -12,15 +12,19 @@ struct ContentView: View {
         NavigationView {
             List {
                 NavigationLink("Counter Application",
-                               destination: CounterHomeView(
-                                system: CounterApp.System.counter
-                                    .uiSystem(viewStateFactory: CounterApp.ViewState.stateToViewState(state:))
+                               destination: CounterApp.RootView(
+                                system: CounterApp
+                                    .System
+                                    .counter
+                                    .uiSystem()
                                     .run()
                                ))
 
                 NavigationLink("Giphy Trends Application",
                                destination: GifList.RootView(
-                                system: GifList.System.make()
+                                system: GifList
+                                    .System
+                                    .gifOverview
                                     .uiSystem(viewStateFactory: GifList.ViewState.stateToViewState(state:))
                                     .run()
                                ))

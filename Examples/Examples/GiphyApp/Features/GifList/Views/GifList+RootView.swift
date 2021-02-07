@@ -15,7 +15,7 @@ extension GifList {
         @SwiftUI.State private var selectedGif: String?
 
         var body: some View {
-            self.makeView(basedOn: system.state)
+            self.makeView(basedOn: self.system.state)
                 .navigationBarTitle("Trends", displayMode: .inline)
                 .navigationBarItems(trailing: Button {
                     self.system.emit(GifList.Events.Refresh())
@@ -93,9 +93,8 @@ extension String: Identifiable {
     }
 }
 
-
 struct GifList_RootView_Previews: PreviewProvider {
     static var previews: some View {
-        GifList.RootView(system: GifList.System.make().uiSystem(viewStateFactory: GifList.ViewState.stateToViewState(state:)))
+        GifList.RootView(system: GifList.System.gifOverview.uiSystem(viewStateFactory: GifList.ViewState.stateToViewState(state:)))
     }
 }

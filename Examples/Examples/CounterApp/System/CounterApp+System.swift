@@ -1,5 +1,5 @@
 //
-//  System.swift
+//  CounterApp+System.swift
 //  Examples
 //
 //  Created by Thibault Wittemberg on 2021-01-12.
@@ -30,8 +30,8 @@ extension CounterApp.System {
         }
 
         Transitions {
-            CounterApp.Transitions.fixedTransitions
-            CounterApp.Transitions.resetTransitions
+            CounterApp.Transitions.fixedTransition
+            CounterApp.Transitions.resetTransition
             CounterApp.Transitions.decreasingTransitions
             CounterApp.Transitions.increasingTransitions
         }

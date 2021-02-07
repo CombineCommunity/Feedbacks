@@ -12,7 +12,7 @@ extension GifDetail {
 }
 
 extension GifDetail.ViewState {
-    enum Value: State, Equatable, CanBeUndefined {
+    enum Value: ViewState {
         case displayLoading
         case displayLoaded(item: GifDetail.ViewState.Item)
         case displayTogglingFavorite(item: GifDetail.ViewState.Item)

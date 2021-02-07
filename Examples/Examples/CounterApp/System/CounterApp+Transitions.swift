@@ -1,5 +1,5 @@
 //
-//  Transitions.swift
+//  CounterApp+Transitions.swift
 //  Examples
 //
 //  Created by Thibault Wittemberg on 2021-01-12.
@@ -13,16 +13,13 @@ extension CounterApp {
 }
 
 extension CounterApp.Transitions {
-    static let fixedTransitions = Transitions {
-        Transition(from: CounterApp.States.Fixed.self, on: CounterApp.Events.TogglePause.self) { state, _ -> State in
-            CounterApp.States.Decreasing(value: state.value, isPaused: false)
-        }
+    static let fixedTransition = Transition(from: CounterApp.States.Fixed.self,
+                                             on: CounterApp.Events.TogglePause.self) { state, _ -> State in
+        CounterApp.States.Decreasing(value: state.value, isPaused: false)
     }
 
-    static let resetTransitions = Transitions {
-        Transition(from: AnyState.self, on: CounterApp.Events.Reset.self) { _, event -> State in
-            CounterApp.States.Fixed(value: event.value)
-        }
+    static let resetTransition = Transition(from: AnyState.self, on: CounterApp.Events.Reset.self) { _, event -> State in
+        CounterApp.States.Fixed(value: event.value)
     }
 
     static let decreasingTransitions = Transitions {

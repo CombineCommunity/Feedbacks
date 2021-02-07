@@ -41,14 +41,15 @@
 		747182A825AE7B0E0098E83E /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 747182A725AE7B0E0098E83E /* Assets.xcassets */; };
 		747182AB25AE7B0E0098E83E /* Preview Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 747182AA25AE7B0E0098E83E /* Preview Assets.xcassets */; };
 		747182B525AE7FB30098E83E /* Feedbacks in Frameworks */ = {isa = PBXBuildFile; productRef = 747182B425AE7FB30098E83E /* Feedbacks */; };
-		747182BA25AE80360098E83E /* CounterHomeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 747182B925AE80360098E83E /* CounterHomeView.swift */; };
-		747182C225AE80DC0098E83E /* Events.swift in Sources */ = {isa = PBXBuildFile; fileRef = 747182C125AE80DC0098E83E /* Events.swift */; };
-		747182C625AE81180098E83E /* States.swift in Sources */ = {isa = PBXBuildFile; fileRef = 747182C525AE81180098E83E /* States.swift */; };
+		747182BA25AE80360098E83E /* CounterApp+RootView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 747182B925AE80360098E83E /* CounterApp+RootView.swift */; };
+		747182C225AE80DC0098E83E /* CounterApp+Events.swift in Sources */ = {isa = PBXBuildFile; fileRef = 747182C125AE80DC0098E83E /* CounterApp+Events.swift */; };
+		747182C625AE81180098E83E /* CounterApp+States.swift in Sources */ = {isa = PBXBuildFile; fileRef = 747182C525AE81180098E83E /* CounterApp+States.swift */; };
 		747182C925AE82640098E83E /* CounterApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 747182C825AE82640098E83E /* CounterApp.swift */; };
-		747182CC25AE830E0098E83E /* Transitions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 747182CB25AE830E0098E83E /* Transitions.swift */; };
-		747182CF25AE85B40098E83E /* SideEffects.swift in Sources */ = {isa = PBXBuildFile; fileRef = 747182CE25AE85B40098E83E /* SideEffects.swift */; };
-		747182D425AE878D0098E83E /* System.swift in Sources */ = {isa = PBXBuildFile; fileRef = 747182D325AE878D0098E83E /* System.swift */; };
-		747182DC25AE8B260098E83E /* ViewState.swift in Sources */ = {isa = PBXBuildFile; fileRef = 747182DB25AE8B250098E83E /* ViewState.swift */; };
+		747182CC25AE830E0098E83E /* CounterApp+Transitions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 747182CB25AE830E0098E83E /* CounterApp+Transitions.swift */; };
+		747182CF25AE85B40098E83E /* CounterApp+SideEffects.swift in Sources */ = {isa = PBXBuildFile; fileRef = 747182CE25AE85B40098E83E /* CounterApp+SideEffects.swift */; };
+		747182D425AE878D0098E83E /* CounterApp+System.swift in Sources */ = {isa = PBXBuildFile; fileRef = 747182D325AE878D0098E83E /* CounterApp+System.swift */; };
+		749D95FC25CF4ED200795E04 /* GifDetail+Dependencies.swift in Sources */ = {isa = PBXBuildFile; fileRef = 749D95FB25CF4ED200795E04 /* GifDetail+Dependencies.swift */; };
+		749D960025CF50EF00795E04 /* GifList+Dependencies.swift in Sources */ = {isa = PBXBuildFile; fileRef = 749D95FF25CF50EF00795E04 /* GifList+Dependencies.swift */; };
 		74EAB46C25B7BF0A003283E4 /* GifDetail+ViewState.swift in Sources */ = {isa = PBXBuildFile; fileRef = 74EAB46B25B7BF0A003283E4 /* GifDetail+ViewState.swift */; };
 /* End PBXBuildFile section */
 
@@ -88,14 +89,15 @@
 		747182A725AE7B0E0098E83E /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		747182AA25AE7B0E0098E83E /* Preview Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = "Preview Assets.xcassets"; sourceTree = "<group>"; };
 		747182AC25AE7B0E0098E83E /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
-		747182B925AE80360098E83E /* CounterHomeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CounterHomeView.swift; sourceTree = "<group>"; };
-		747182C125AE80DC0098E83E /* Events.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Events.swift; sourceTree = "<group>"; };
-		747182C525AE81180098E83E /* States.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = States.swift; sourceTree = "<group>"; };
+		747182B925AE80360098E83E /* CounterApp+RootView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "CounterApp+RootView.swift"; sourceTree = "<group>"; };
+		747182C125AE80DC0098E83E /* CounterApp+Events.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "CounterApp+Events.swift"; sourceTree = "<group>"; };
+		747182C525AE81180098E83E /* CounterApp+States.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "CounterApp+States.swift"; sourceTree = "<group>"; };
 		747182C825AE82640098E83E /* CounterApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CounterApp.swift; sourceTree = "<group>"; };
-		747182CB25AE830E0098E83E /* Transitions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Transitions.swift; sourceTree = "<group>"; };
-		747182CE25AE85B40098E83E /* SideEffects.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SideEffects.swift; sourceTree = "<group>"; };
-		747182D325AE878D0098E83E /* System.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = System.swift; sourceTree = "<group>"; };
-		747182DB25AE8B250098E83E /* ViewState.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ViewState.swift; sourceTree = "<group>"; };
+		747182CB25AE830E0098E83E /* CounterApp+Transitions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "CounterApp+Transitions.swift"; sourceTree = "<group>"; };
+		747182CE25AE85B40098E83E /* CounterApp+SideEffects.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "CounterApp+SideEffects.swift"; sourceTree = "<group>"; };
+		747182D325AE878D0098E83E /* CounterApp+System.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "CounterApp+System.swift"; sourceTree = "<group>"; };
+		749D95FB25CF4ED200795E04 /* GifDetail+Dependencies.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "GifDetail+Dependencies.swift"; sourceTree = "<group>"; };
+		749D95FF25CF50EF00795E04 /* GifList+Dependencies.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "GifList+Dependencies.swift"; sourceTree = "<group>"; };
 		74EAB46B25B7BF0A003283E4 /* GifDetail+ViewState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "GifDetail+ViewState.swift"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -145,6 +147,7 @@
 		742FEE2225B388B000575CB2 /* System */ = {
 			isa = PBXGroup;
 			children = (
+				749D95FF25CF50EF00795E04 /* GifList+Dependencies.swift */,
 				742FEE3025B38F5300575CB2 /* GifList+Events.swift */,
 				742FEE3825B3978600575CB2 /* GifList+SideEffects.swift */,
 				742FEE2725B38B1A00575CB2 /* GifList+States.swift */,
@@ -226,6 +229,7 @@
 		742FEE7025B4F64000575CB2 /* System */ = {
 			isa = PBXGroup;
 			children = (
+				749D95FB25CF4ED200795E04 /* GifDetail+Dependencies.swift */,
 				742FEE7925B508FC00575CB2 /* GifDetail+Events.swift */,
 				742FEE8625B50CCA00575CB2 /* GifDetail+SideEffects.swift */,
 				742FEE7625B506E700575CB2 /* GifDetail+States.swift */,
@@ -295,11 +299,11 @@
 		747182BD25AE80950098E83E /* System */ = {
 			isa = PBXGroup;
 			children = (
-				747182C125AE80DC0098E83E /* Events.swift */,
-				747182CE25AE85B40098E83E /* SideEffects.swift */,
-				747182C525AE81180098E83E /* States.swift */,
-				747182D325AE878D0098E83E /* System.swift */,
-				747182CB25AE830E0098E83E /* Transitions.swift */,
+				747182C125AE80DC0098E83E /* CounterApp+Events.swift */,
+				747182CE25AE85B40098E83E /* CounterApp+SideEffects.swift */,
+				747182C525AE81180098E83E /* CounterApp+States.swift */,
+				747182D325AE878D0098E83E /* CounterApp+System.swift */,
+				747182CB25AE830E0098E83E /* CounterApp+Transitions.swift */,
 			);
 			path = System;
 			sourceTree = "<group>";
@@ -307,8 +311,7 @@
 		747182BE25AE809E0098E83E /* Views */ = {
 			isa = PBXGroup;
 			children = (
-				747182B925AE80360098E83E /* CounterHomeView.swift */,
-				747182DB25AE8B250098E83E /* ViewState.swift */,
+				747182B925AE80360098E83E /* CounterApp+RootView.swift */,
 			);
 			path = Views;
 			sourceTree = "<group>";
@@ -390,28 +393,29 @@
 			files = (
 				747182C925AE82640098E83E /* CounterApp.swift in Sources */,
 				742FEE3125B38F5300575CB2 /* GifList+Events.swift in Sources */,
-				747182C625AE81180098E83E /* States.swift in Sources */,
+				747182C625AE81180098E83E /* CounterApp+States.swift in Sources */,
 				742FEE8725B50CCA00575CB2 /* GifDetail+SideEffects.swift in Sources */,
 				742FEE9725B52D2D00575CB2 /* GifDetail+RootView.swift in Sources */,
 				742FEE2425B388DA00575CB2 /* GifList.swift in Sources */,
 				742FEE4725B3AC3600575CB2 /* HTTPService.swift in Sources */,
-				747182DC25AE8B260098E83E /* ViewState.swift in Sources */,
 				742FEE2825B38B1A00575CB2 /* GifList+States.swift in Sources */,
 				742FEE5725B3CB6000575CB2 /* Pagination.swift in Sources */,
 				742FEE7E25B50A7C00575CB2 /* GifDetail+Transitions.swift in Sources */,
+				749D95FC25CF4ED200795E04 /* GifDetail+Dependencies.swift in Sources */,
 				742FEE6325B3CED500575CB2 /* GifList+RowView.swift in Sources */,
 				742FEE3925B3978600575CB2 /* GifList+SideEffects.swift in Sources */,
-				747182CF25AE85B40098E83E /* SideEffects.swift in Sources */,
+				747182CF25AE85B40098E83E /* CounterApp+SideEffects.swift in Sources */,
 				742FEE9225B526EB00575CB2 /* GifDetail+System.swift in Sources */,
-				747182C225AE80DC0098E83E /* Events.swift in Sources */,
+				747182C225AE80DC0098E83E /* CounterApp+Events.swift in Sources */,
+				749D960025CF50EF00795E04 /* GifList+Dependencies.swift in Sources */,
 				742FEE2E25B38EEE00575CB2 /* GifOverview.swift in Sources */,
-				747182BA25AE80360098E83E /* CounterHomeView.swift in Sources */,
+				747182BA25AE80360098E83E /* CounterApp+RootView.swift in Sources */,
 				742FEE6025B3CC8800575CB2 /* GifList+ViewState.swift in Sources */,
 				742FEE6925B3D02500575CB2 /* ActivityIndicatorView.swift in Sources */,
 				742FEE7A25B508FC00575CB2 /* GifDetail+Events.swift in Sources */,
 				742FEE5C25B3CC7200575CB2 /* GifList+RootView.swift in Sources */,
 				742FEE5025B3B42D00575CB2 /* GifListRequestParameter.swift in Sources */,
-				747182CC25AE830E0098E83E /* Transitions.swift in Sources */,
+				747182CC25AE830E0098E83E /* CounterApp+Transitions.swift in Sources */,
 				742FEE6C25B3D58300575CB2 /* Encodable+Dictionary.swift in Sources */,
 				742FEE7325B4F65300575CB2 /* GifDetail.swift in Sources */,
 				742FEE8D25B5260E00575CB2 /* GifDetailResponse.swift in Sources */,
@@ -421,7 +425,7 @@
 				742FEE4325B3AA2500575CB2 /* StorageService.swift in Sources */,
 				742FEE8225B50A9000575CB2 /* Images.swift in Sources */,
 				747182A625AE7B0B0098E83E /* ContentView.swift in Sources */,
-				747182D425AE878D0098E83E /* System.swift in Sources */,
+				747182D425AE878D0098E83E /* CounterApp+System.swift in Sources */,
 				742FEE5825B3CB6000575CB2 /* Meta.swift in Sources */,
 				742FEE8325B50A9000575CB2 /* Gif.swift in Sources */,
 				742FEE4B25B3B3A200575CB2 /* GifList+System.swift in Sources */,
@@ -622,8 +626,8 @@
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "git@github.com:twittemb/Feedbacks.git";
 			requirement = {
-				kind = exactVersion;
-				version = 0.1.0;
+				kind = revision;
+				revision = 997f6fbad8e51401a027bdb60bfd4fbc3b15f553;
 			};
 		};
 /* End XCRemoteSwiftPackageReference section */

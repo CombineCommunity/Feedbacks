@@ -70,7 +70,7 @@ final class SystemTests: XCTestCase {
         
         // Given: a system recording the execution queues for side effects and reducer
         // Given: a system that executes side effects and reducer on dedicated schedulers
-        let sut = System {
+        @SystemBuilder var system: System {
             InitialState {
                 MockStateA(value: 1)
             }
@@ -100,7 +100,9 @@ final class SystemTests: XCTestCase {
                     return MockStateA(value: state.value + 1)
                 }
             }
-        }.execute(on: DispatchQueue(label: expectedSystemQueue))
+        }
+
+        let sut = system.execute(on: DispatchQueue(label: expectedSystemQueue))
         
         // When: executing that system
         let cancellable = sut
@@ -732,67 +734,6 @@ final class SystemTests: XCTestCase {
 
         // Then: MockEventA is triggered in the attached System
         XCTAssertEqual(receivedEventB as? MockEventA, expectedEventB)
-    }
-    
-    func testUISystem_provide_a_decorator() {
-        let expectedState = MockStateA(value: Int.random(in: 0...1_000_000))
-        var receivedState: State?
-        
-        enum MockViewState: State, Equatable, CanBeUndefined {
-            case first
-            case second
-            case unknown
-            
-            static var undefined: MockViewState {
-                MockViewState.unknown
-            }
-        }
-
-
-        
-        // Given: a system
-        let sut = System {
-            InitialState {
-                expectedState
-            }
-            Feedbacks {
-                Feedback { (states: AnyPublisher<State, Never>) in
-                    return states
-                        .handleEvents(receiveOutput: { receivedState = $0 })
-                        .flatMap { _ in Empty().eraseToAnyPublisher() }
-                        .eraseToAnyPublisher()
-                }
-            }
-            .execute(on: DispatchQueue.immediateScheduler)
-            
-            Transitions {
-                Transition(from: MockStateA.self, on: MockEventA.self, then: MockStateB(value: 1))
-            }
-        }
-        
-        // when: making a UISystem from it
-        let uiSystem = sut.uiSystem { state -> MockViewState in
-            switch state {
-            case is MockStateA:
-                return .first
-            default:
-                return .second
-            }
-        }
-        .execute(on: DispatchQueue.immediateScheduler)
-        .executeViewStateFactory(on: DispatchQueue.immediateScheduler)
-        
-        let cancellable = uiSystem.stream.sink { _ in }
-        
-        // Then: the UISystem has the expected specifications
-        XCTAssertEqual(uiSystem.initialState.value as? MockStateA, sut.initialState.value as? MockStateA)
-        XCTAssertEqual(uiSystem.feedbacks.feedbacks.count, sut.feedbacks.feedbacks.count + 2) // 2 UI feedbacks are added to the UISystem
-        XCTAssertEqual(uiSystem.transitions.transitions.count, sut.transitions.transitions.count)
-        XCTAssertEqual(receivedState as? MockStateA, expectedState)
-        XCTAssertEqual(uiSystem.transitions.reducer(MockStateA(value: 1), MockNextEvent()) as? MockStateB,
-                       sut.transitions.reducer(MockStateA(value: 1), MockNextEvent()) as? MockStateB)
-        
-        cancellable.cancel()
     }
 }
 

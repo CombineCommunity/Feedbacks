@@ -1,5 +1,5 @@
 //
-//  States.swift
+//  CounterApp+States.swift
 //  Examples
 //
 //  Created by Thibault Wittemberg on 2021-01-12.
