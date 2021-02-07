@@ -626,8 +626,8 @@
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "git@github.com:twittemb/Feedbacks.git";
 			requirement = {
-				kind = revision;
-				revision = 997f6fbad8e51401a027bdb60bfd4fbc3b15f553;
+				kind = exactVersion;
+				version = 0.2.0;
 			};
 		};
 /* End XCRemoteSwiftPackageReference section */
