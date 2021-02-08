@@ -2,7 +2,7 @@
 ![](https://github.com/twittemb/Feedbacks/workflows/SwiftLint/badge.svg)
 [![Swift Package Manager compatible](https://img.shields.io/badge/Swift%20Package%20Manager-compatible-brightgreen.svg)](https://github.com/apple/swift-package-manager)
  ![platforms](https://img.shields.io/badge/platforms-iOS%20%7C%20macOS%20%7C%20tvOS%20%7C%20watchOS-333333.svg)
-[![codecov](https://codecov.io/gh/twittemb/Feedbacks/branch/main/graph/badge.svg)](https://codecov.io/gh/twittemb/Feedbacks)
+[![codecov](https://codecov.io/gh/CombineCommunity/Feedbacks/branch/main/graph/badge.svg)](https://codecov.io/gh/twittemb/Feedbacks)
 
 <div style="text-align:center">
 <img src="./Resources/logo_feedbacks_black.png" height="300" style="border-radius: 20px;"/>
