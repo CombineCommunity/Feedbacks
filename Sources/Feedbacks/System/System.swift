@@ -247,7 +247,7 @@ public extension System {
     }
 }
 
-@_functionBuilder
+@resultBuilder
 public struct SystemBuilder {
     public static func buildBlock(
         _ initialState: InitialState,

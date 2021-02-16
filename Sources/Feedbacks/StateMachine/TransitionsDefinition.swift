@@ -26,14 +26,14 @@ public protocol TransitionsDefinition {
     func disable(_ disabled: @escaping () -> Bool) -> Self
 }
 
-@_functionBuilder
+@resultBuilder
 public struct TransitionsDefinitionsBuilder {
     public static func buildBlock(_ transitions: TransitionsDefinition...) -> [TransitionsDefinition] {
         transitions
     }
 }
 
-@_functionBuilder
+@resultBuilder
 public struct TransitionsBuilder {
     public static func buildBlock(_ transitions: TransitionsDefinition...) -> Transitions {
         Transitions(transitions: transitions)

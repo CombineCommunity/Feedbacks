@@ -153,7 +153,7 @@ public extension Feedbacks {
     }
 }
 
-@_functionBuilder
+@resultBuilder
 public struct FeedbacksBuilder {
     public static func buildBlock(_ feedbacks: Feedback...) -> [Feedback] {
         feedbacks
