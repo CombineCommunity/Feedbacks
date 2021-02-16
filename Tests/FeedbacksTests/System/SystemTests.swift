@@ -32,7 +32,7 @@ final class SystemTests: XCTestCase {
             }
             
             Feedbacks {
-                Feedback(strategy: .continueOnNewState) { state -> AnyPublisher<Event, Never> in
+                Feedback(on: AnyState.self, strategy: .continueOnNewState) { state -> AnyPublisher<Event, Never> in
                     receivedStates.append(state)
                     return Just<Event>(MockNextEvent()).eraseToAnyPublisher()
                 }
@@ -76,13 +76,13 @@ final class SystemTests: XCTestCase {
             }
             
             Feedbacks {
-                Feedback(strategy: .continueOnNewState) { (state: MockStateA) -> AnyPublisher<Event, Never> in
+                Feedback(on: MockStateA.self, strategy: .continueOnNewState) { state -> AnyPublisher<Event, Never> in
                     receivedFeedbackAQueue.append(DispatchQueue.currentLabel)
                     return Just<Event>(MockNextEvent()).eraseToAnyPublisher()
                 }
                 .execute(on: DispatchQueue(label: expectedFeedbackAQueue))
                 
-                Feedback(strategy: .continueOnNewState) { (state: MockStateB) -> AnyPublisher<Event, Never> in
+                Feedback(on: MockStateB.self, strategy: .continueOnNewState) { state -> AnyPublisher<Event, Never> in
                     receivedFeedbackBQueue.append(DispatchQueue.currentLabel)
                     return Just<Event>(MockNextEvent()).eraseToAnyPublisher()
                 }
@@ -133,12 +133,12 @@ final class SystemTests: XCTestCase {
             }
             
             Feedbacks {
-                Feedback(strategy: .continueOnNewState) { (state: MockStateA) -> AnyPublisher<Event, Never> in
+                Feedback(on: MockStateA.self, strategy: .continueOnNewState) { state -> AnyPublisher<Event, Never> in
                     receivedSystemQueue.append(DispatchQueue.currentLabel)
                     return Just<Event>(MockNextEvent()).eraseToAnyPublisher()
                 }
                 
-                Feedback(strategy: .continueOnNewState) { (state: MockStateB) -> AnyPublisher<Event, Never> in
+                Feedback(on: MockStateB.self, strategy: .continueOnNewState) { state -> AnyPublisher<Event, Never> in
                     receivedSystemQueue.append(DispatchQueue.currentLabel)
                     return Just<Event>(MockNextEvent()).eraseToAnyPublisher()
                 }
@@ -195,28 +195,28 @@ final class SystemTests: XCTestCase {
             }
             
             Feedbacks {
-                Feedback(strategy: .continueOnNewState) { (state: State) -> AnyPublisher<Event, Never> in
+                Feedback(on: AnyState.self, strategy: .continueOnNewState) { state -> AnyPublisher<Event, Never> in
                     receivedStatesInFeedbackA.append(state)
                     guard state is MockStateA else { return Empty().eraseToAnyPublisher() }
                     return Just<Event>(MockNextEvent()).eraseToAnyPublisher()
                 }
                 .execute(on: DispatchQueue(label: UUID().uuidString))
                 
-                Feedback(strategy: .continueOnNewState) { (state: State) -> AnyPublisher<Event, Never> in
+                Feedback(on: AnyState.self, strategy: .continueOnNewState) { state -> AnyPublisher<Event, Never> in
                     receivedStatesInFeedbackB.append(state)
                     guard state is MockStateB else { return Empty().eraseToAnyPublisher() }
                     return Just<Event>(MockNextEvent()).eraseToAnyPublisher()
                 }
                 .execute(on: DispatchQueue(label: UUID().uuidString))
                 
-                Feedback(strategy: .continueOnNewState) { (state: State) -> AnyPublisher<Event, Never> in
+                Feedback(on: AnyState.self, strategy: .continueOnNewState) { state -> AnyPublisher<Event, Never> in
                     receivedStatesInFeedbackC.append(state)
                     guard state is MockStateC else { return Empty().eraseToAnyPublisher() }
                     return Just<Event>(MockNextEvent()).eraseToAnyPublisher()
                 }
                 .execute(on: DispatchQueue(label: UUID().uuidString))
                 
-                Feedback(strategy: .continueOnNewState) { (state: State) -> AnyPublisher<Event, Never> in
+                Feedback(on: AnyState.self, strategy: .continueOnNewState) { state -> AnyPublisher<Event, Never> in
                     receivedStatesInFeedbackD.append(state)
                     guard state is MockStateD else { return Empty().eraseToAnyPublisher() }
                     return Just<Event>(MockNextEvent()).eraseToAnyPublisher()

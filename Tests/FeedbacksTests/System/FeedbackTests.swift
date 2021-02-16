@@ -52,83 +52,151 @@ extension FeedbackTests {
     }
 }
 
-// MARK: tests for Feedback.init(sideEffect:strategy:)
+// MARK: tests for Feedback.init(on:sideEffect:)
 extension FeedbackTests {
-    func testInit_use_the_sideEffect_and_apply_the_strategy() {
+    func testInit_give_anyStates_to_the_sideEffect_when_publisher() {
         let expectedState = MockStateA(value: Int.random(in: 1...1_000_000))
         var receivedStates = [State]()
-        
+
         let expectedEvent = MockEventA(value: Int.random(in: 1...1_000_000))
         var receivedEvents = [Event]()
-        
-        let expectedStrategy = Feedback.Strategy.continueOnNewState
-        var receivedStrategy: Feedback.Strategy?
-        
-        // Given: a sideEffect recording its input State and emitting an expected Event
-        let spySideEffect: (State) -> AnyPublisher<Event, Never> = { state in
-            receivedStates.append(state)
-            return Just(expectedEvent).eraseToAnyPublisher()
-        }
-        
-        // When: making a feedback of it, and executing it with an expected input State
-        let sut = Feedback(strategy: .continueOnNewState,
-                           willExecuteWithStrategy: { strategy in receivedStrategy = strategy },
-                           sideEffect: spySideEffect)
-        
+
+        // Given: a Feedback receiving AnyStates
+        let sut = Feedback(on: AnyState.self) { (states: AnyPublisher<State, Never>) -> AnyPublisher<Event, Never> in
+            states
+                .handleEvents(receiveOutput: { receivedStates.append($0) })
+                .map { _ in expectedEvent }
+                .eraseToAnyPublisher()
+        }.execute(on: DispatchQueue.immediateScheduler)
+
+        // When: running the feedback with a MockStateA
         let cancellable = sut.sideEffect(Just(expectedState).eraseToAnyPublisher()).sink { receivedEvents.append($0) }
-        
-        // Then: the side effect used to build the Feedback is used as expected with the expected strategy
+
+        // Then: the side effect used to build the Feedback is used as expected
         XCTAssertEqual(receivedStates.count, 1)
         XCTAssertEqual(receivedStates[0] as? MockStateA, expectedState)
-        
+
         XCTAssertEqual(receivedEvents.count, 1)
         XCTAssertEqual(receivedEvents[0] as? MockEventA, expectedEvent)
-        
-        XCTAssertEqual(receivedStrategy, expectedStrategy)
-        
+
         cancellable.cancel()
     }
 }
 
-// MARK: tests for Feedback.init(sideEffect:strategy:) with a concrete state
+
+// MARK: tests for Feedback.init(on:strategy:sideEffect:)
 extension FeedbackTests {
-    func testInit_use_the_sideEffect_with_concreteState_and_apply_the_strategy() {
-        var sideEffectIsCalled = false
-        
-        let expectedEvent = MockEventA(value: Int.random(in: 0...1_000_000))
-        var receivedEvents = [Event]()
-        
+    func testInit_give_anyState_to_the_sideEffect_when_strategy() {
         let expectedStrategy = Feedback.Strategy.continueOnNewState
         var receivedStrategy: Feedback.Strategy?
-        
-        let inputStateStream = PassthroughSubject<State, Never>()
-        
-        // Given: a sideEffect for a concrete state, recording whether it is called or not, and emitting an expected Event
-        let spySideEffect: (MockStateA) -> AnyPublisher<Event, Never> = { stateA in
-            sideEffectIsCalled = true
-            return Just(expectedEvent).eraseToAnyPublisher()
-        }
-        
-        // When: making a feedback of it, and executing it with a State input stream
-        let sut = Feedback(strategy: .continueOnNewState,
-                           willExecuteWithStrategy: { strategy in receivedStrategy = strategy },
-                           sideEffect: spySideEffect)
-        
-        let cancellable = sut.sideEffect(inputStateStream.eraseToAnyPublisher()).sink { receivedEvents.append($0) }
-        
-        // Then: the side effect used to build the Feedback is called only for the expected concrete input state
-        inputStateStream.send(MockStateB())
-        XCTAssertFalse(sideEffectIsCalled)
-        
-        inputStateStream.send(MockStateA(value: 1))
-        XCTAssertTrue(sideEffectIsCalled)
-        
-        // Then: the side effect used to build the Feedback is used as expected with the expected strategy
+
+        let expectedState = MockStateA(value: Int.random(in: 1...1_000_000))
+        var receivedStates = [State]()
+
+        let expectedEvent = MockEventA(value: Int.random(in: 1...1_000_000))
+        var receivedEvents = [Event]()
+
+        // Given: a Feedback receiving an AnyState
+        let sut = Feedback(on: AnyState.self,
+                           strategy: expectedStrategy,
+                           willExecuteWithStrategy: { receivedStrategy = $0 }) { (state: State) -> AnyPublisher<Event, Never> in
+            receivedStates.append(state)
+            return Just(expectedEvent)
+                .eraseToAnyPublisher()
+        }.execute(on: DispatchQueue.immediateScheduler)
+
+        // When: running the feedback with a MockStateA
+        let cancellable = sut.sideEffect(Just(expectedState).eraseToAnyPublisher()).sink { receivedEvents.append($0) }
+
+        // Then: the side effect used to build the Feedback is used as expected
+        XCTAssertEqual(receivedStates.count, 1)
+        XCTAssertEqual(receivedStates[0] as? MockStateA, expectedState)
+
         XCTAssertEqual(receivedEvents.count, 1)
         XCTAssertEqual(receivedEvents[0] as? MockEventA, expectedEvent)
-        
+
         XCTAssertEqual(receivedStrategy, expectedStrategy)
-        
+
+        cancellable.cancel()
+    }
+}
+
+
+// MARK: tests for Feedback.init(on:sideEffect) with a concrete state
+extension FeedbackTests {
+    func testInit_give_concreteStates_to_the_sideEffect_when_publisher() {
+        let expectedState = MockStateA(value: Int.random(in: 1...1_000_000))
+        var receivedStates = [State]()
+
+        let expectedEvent = MockEventA(value: Int.random(in: 0...1_000_000))
+        var receivedEvents = [Event]()
+
+        let inputStateStream = PassthroughSubject<State, Never>()
+
+        // Given: a sideEffect for a concrete state, recording whether it is called or not, and emitting an expected Even
+        let sut = Feedback(on: MockStateA.self) { (states: AnyPublisher<MockStateA, Never>) -> AnyPublisher<Event, Never> in
+            states
+                .handleEvents(receiveOutput: { receivedStates.append($0) })
+                .map { _ in expectedEvent }
+                .eraseToAnyPublisher()
+        }.execute(on: DispatchQueue.immediateScheduler)
+
+        let cancellable = sut.sideEffect(inputStateStream.eraseToAnyPublisher()).sink { receivedEvents.append($0) }
+
+        // Then: the side effect used to build the Feedback is called only for the expected concrete input state
+        inputStateStream.send(MockStateB())
+        XCTAssertTrue(receivedStates.isEmpty)
+
+        inputStateStream.send(expectedState)
+        XCTAssertEqual(receivedStates[0] as? MockStateA, expectedState)
+
+        // Then: the side effect used to build the Feedback is used as expected
+        XCTAssertEqual(receivedEvents.count, 1)
+        XCTAssertEqual(receivedEvents[0] as? MockEventA, expectedEvent)
+
+        cancellable.cancel()
+    }
+}
+
+// MARK: tests for Feedback.init(on:strategy:sideEffect) with a concrete state
+extension FeedbackTests {
+    func testInit_give_concreteState_to_the_sideEffect_when_strategy() {
+        let expectedStrategy = Feedback.Strategy.continueOnNewState
+        var receivedStrategy: Feedback.Strategy?
+
+        let expectedState = MockStateA(value: Int.random(in: 1...1_000_000))
+        var receivedStates = [State]()
+
+        let expectedEvent = MockEventA(value: Int.random(in: 1...1_000_000))
+        var receivedEvents = [Event]()
+
+        let inputStateStream = PassthroughSubject<State, Never>()
+
+        // Given: a Feedback receiving a concrete state
+        let sut = Feedback(on: MockStateA.self,
+                           strategy: expectedStrategy,
+                           willExecuteWithStrategy: { receivedStrategy = $0 }) { state -> AnyPublisher<Event, Never> in
+            receivedStates.append(state)
+            return Just(expectedEvent)
+                .eraseToAnyPublisher()
+        }.execute(on: DispatchQueue.immediateScheduler)
+
+        // When: running the feedback with a MockStateA
+        let cancellable = sut.sideEffect(inputStateStream.eraseToAnyPublisher()).sink { receivedEvents.append($0) }
+
+        // Then: the side effect used to build the Feedback is called only for the expected concrete input state
+        inputStateStream.send(MockStateB())
+        XCTAssertTrue(receivedStates.isEmpty)
+
+        inputStateStream.send(expectedState)
+        XCTAssertEqual(receivedStates[0] as? MockStateA, expectedState)
+
+        // Then: the side effect used to build the Feedback is used as expected
+        XCTAssertEqual(receivedEvents.count, 1)
+        XCTAssertEqual(receivedEvents[0] as? MockEventA, expectedEvent)
+
+        XCTAssertEqual(receivedStrategy, expectedStrategy)
+
         cancellable.cancel()
     }
 }
@@ -148,7 +216,7 @@ extension FeedbackTests {
         }
         
         // When: making a Feedback of it, and executing it on the expected Queue
-        let sut = Feedback(strategy: .continueOnNewState, sideEffect: spySideEffect)
+        let sut = Feedback(on: MockStateA.self, strategy: .continueOnNewState, sideEffect: spySideEffect)
             .execute(on: DispatchQueue(label: expectedQueue))
         
         let cancellable = sut.sideEffect(Just(MockStateA(value: 1)).eraseToAnyPublisher()).sink{ _ in exp.fulfill() }
@@ -176,7 +244,7 @@ extension FeedbackTests {
         }
         
         // When: making a feedback of it, with a disable(:) modifier
-        let sut = Feedback(strategy: .continueOnNewState, sideEffect: spySideEffect).disable { isDisabled }
+        let sut = Feedback(on: AnyState.self, strategy: .continueOnNewState, sideEffect: spySideEffect).disable { isDisabled }
         
         let inputStateStream = PassthroughSubject<State, Never>()
         

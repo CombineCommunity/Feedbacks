@@ -135,9 +135,13 @@ public extension Feedbacks {
     /// - Parameter perform: the middleware to execute
     /// - Returns: the Feedbacks that executes the middleware before executing the side effects
     func onStateReceived(_ perform: @escaping (State) -> Void) -> Feedbacks {
-        let stateReceivedFeedback = Feedback(strategy: .continueOnNewState) { (state: State) in
-            perform(state)
-            return Empty().eraseToAnyPublisher()
+        let stateReceivedFeedback = Feedback { (states: AnyPublisher<State, Never>) in
+            states
+                .handleEvents(receiveOutput: perform)
+                .flatMap { _ in
+                    Empty<Event, Never>().eraseToAnyPublisher()
+                }
+                .eraseToAnyPublisher()
         }
 
         let newFeedbacks = self.feedbacks + [stateReceivedFeedback]
