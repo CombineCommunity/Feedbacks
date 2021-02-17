@@ -19,8 +19,13 @@ extension CounterApp.System {
         }
 
         Feedbacks {
-            Feedback(strategy: .cancelOnNewState, sideEffect: CounterApp.SideEffects.decreaseEffect(state:))
-            Feedback(strategy: .cancelOnNewState, sideEffect: CounterApp.SideEffects.increaseEffect(state:))
+            Feedback(on: CounterApp.States.Decreasing.self,
+                     strategy: .cancelOnNewState,
+                     sideEffect: CounterApp.SideEffects.decreaseEffect(state:))
+
+            Feedback(on: CounterApp.States.Increasing.self,
+                     strategy: .cancelOnNewState,
+                     sideEffect: CounterApp.SideEffects.increaseEffect(state:))
         }
         .onStateReceived {
             print("Counter: New state has been received: \($0)")

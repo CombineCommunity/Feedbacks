@@ -25,7 +25,7 @@ extension GifList.System {
             }
 
             Feedbacks {
-                Feedback(strategy: .cancelOnNewState, sideEffect: loadSideEffect)
+                Feedback(on: GifList.States.Loading.self , strategy: .cancelOnNewState, sideEffect: loadSideEffect)
                     .execute(on: DispatchQueue(label: "Load Gifs Queue"))
             }
             .onStateReceived {
