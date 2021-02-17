@@ -136,7 +136,7 @@ final class UISystemTests: XCTestCase {
             }
 
             Feedbacks {
-                Feedback(strategy: .continueOnNewState) { (state: MockState) in
+                Feedback(on: MockState.self, strategy: .continueOnNewState) { state in
                     return Just<Event>(MockEvent(value: 1)).setFailureType(to: Never.self).eraseToAnyPublisher()
                 }
             }
@@ -370,7 +370,7 @@ final class UISystemTests: XCTestCase {
             }
 
             Feedbacks {
-                Feedback(strategy: .continueOnNewState) { (state: MockState) in
+                Feedback(on: MockState.self, strategy: .continueOnNewState) { state in
                     return Just<Event>(MockEvent(value: 1)).setFailureType(to: Never.self).eraseToAnyPublisher()
                 }
             }

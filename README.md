@@ -37,7 +37,7 @@ let system = System {
     }
 
     Feedbacks {
-        Feedback(strategy: .continueOnNewState) { (state: VolumeState) -> AnyPublisher<Event, Never> in
+        Feedback(on: VolumeState.self, strategy: .continueOnNewState) { state -> AnyPublisher<Event, Never> in
             if state.value >= targetedVolume {
                 return Empty().eraseToAnyPublisher()
             }
@@ -45,7 +45,7 @@ let system = System {
             return Just(IncreaseEvent()).eraseToAnyPublisher()
         }
         
-        Feedback(strategy: .continueOnNewState) { (state: VolumeState) -> AnyPublisher<Event, Never> in
+        Feedback(on: VolumeState.self, strategy: .continueOnNewState) { state -> AnyPublisher<Event, Never> in
             if state.value <= targetedVolume {
                 return Empty().eraseToAnyPublisher()
             }
@@ -105,7 +105,7 @@ The declarative syntax of Feedbacks allows to alter the behavior of side effects
 
 ```swift
 Feedbacks {
-    Feedback(strategy: .continueOnNewState) { (state: LoadingState) -> AnyPublisher<Event, Never> in
+    Feedback(on: LoadingState.self, strategy: .continueOnNewState) { state -> AnyPublisher<Event, Never> in
         performLongRunningOperation()
 	        .map { FinishedLoadingEvent() }
 	        .eraseToAnyPublisher()
@@ -118,11 +118,11 @@ As in SwiftUI, modifiers can be applied to the container:
 
 ```swift
 Feedbacks {
-    Feedback(strategy: .continueOnNewState) { (state: LoadingState) -> AnyPublisher<Event, Never> in
+    Feedback(on: LoadingState.self, strategy: .continueOnNewState) { state -> AnyPublisher<Event, Never> in
     	...
     }
     
-    Feedback(strategy: .continueOnNewState) { (state: SelectedState) -> AnyPublisher<Event, Never> in
+    Feedback(on: SelectedState.self, strategy: .continueOnNewState) { state -> AnyPublisher<Event, Never> in
     	...
     }
 }
@@ -159,8 +159,8 @@ enum MySideEffects {
 
 let myNetworkService = MyNetworkService()
 let myDatabaseService = MyDatabaseService()
-let mySideEffect = SideEffect.make(MySideEffects.load, arg1: myNetworkService, arg2: myDatabaseService)
-let feedback = Feedback(strategy: .cancelOnNewState, sideEffect: mySideEffect)
+let loadingEffect = SideEffect.make(MySideEffects.load, arg1: myNetworkService, arg2: myDatabaseService)
+let feedback = Feedback(on: LoadingState.self, strategy: .cancelOnNewState, sideEffect: loadingEffect)
 ```
 
 `SideEffect.make()` factories will transform functions with several parameters (up to 6 including the state) into functions with 1 parameter (the state), on the condition of the state being the last one.
@@ -238,17 +238,17 @@ Everytime the RefreshEvent is received, this transition will produce a LoadingSt
 A Feedback is built from a side effect. A side effect is a function that takes a state as a parameter. There are two ways to build a Feedback:
 
 ```swift
-Feedback(strategy: .continueOnNewState) { (state: State) in
+Feedback(on: AnyState.self, strategy: .continueOnNewState) { state in
 	...
 	.map { _ in MyEvent() }
 	.eraseToAnyPublisher()
 }
 ```
 
-This feedback will execute the side effect for any type of state. It could be useful if you want to perform a side effect each time a new state is generated, regardless of the type of State.
+This feedback will execute the side effect whatever the type of state that is produced. It could be useful if you want to perform a side effect each time a new state is generated, regardless of the type of State.
 
 ```swift
-Feedback(strategy: .continueOnNewState) { (state: LoadingState) in
+Feedback(on: LoadingState.self, strategy: .continueOnNewState) { state in
 	...
 	.map { _ in MyEvent() }
 	.eraseToAnyPublisher()

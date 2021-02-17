@@ -1,3 +1,7 @@
+**v0.3.0 - Tyranus**:
+
+- Feedback: introduce the "on:" keyword to explicitly declare the type of state that concerns the side effect
+
 **v0.2.0 - Vader**:
 
 - UISystem: unify the UISystem concept for RawState and ViewState

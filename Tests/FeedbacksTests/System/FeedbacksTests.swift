@@ -88,13 +88,13 @@ extension FeedbacksTests {
 
         // Given: a Feedbacks composed of feedbacks which side effect are recording there execution queues
         let sut = Feedbacks {
-            Feedback(strategy: .continueOnNewState) { (state: MockStateA) -> AnyPublisher<Event, Never> in
+            Feedback(on: MockStateA.self, strategy: .continueOnNewState) { state -> AnyPublisher<Event, Never> in
                 receivedQueuesA.append(DispatchQueue.currentLabel)
                 return Just(MockEvent(value: 1)).eraseToAnyPublisher()
             }
             .execute(on: DispatchQueue(label: expectedQueueA))
 
-            Feedback(strategy: .continueOnNewState) { (state: MockStateA) -> AnyPublisher<Event, Never> in
+            Feedback(on: MockStateA.self, strategy: .continueOnNewState) { state -> AnyPublisher<Event, Never> in
                 receivedQueuesB.append(DispatchQueue.currentLabel)
                 return Just(MockEvent(value: 1)).eraseToAnyPublisher()
             }
@@ -123,13 +123,13 @@ extension FeedbacksTests {
         var feedbackAIsCalled = false
         var feedbackBIsCalled = false
 
-        // Given: two feeedbacks
-        let inputFeedbackA = Feedback(strategy: .continueOnNewState) { (state: State) in
+        // Given: two feedbacks
+        let inputFeedbackA = Feedback(on: AnyState.self, strategy: .continueOnNewState) { state in
             feedbackAIsCalled = true
             return Empty<Event, Never>().eraseToAnyPublisher()
         }
         
-        let inputFeedbackB = Feedback(strategy: .continueOnNewState) { (state: State) in
+        let inputFeedbackB = Feedback(on: AnyState.self, strategy: .continueOnNewState) { state in
             feedbackBIsCalled = true
             return Empty<Event, Never>().eraseToAnyPublisher()
         }
@@ -157,10 +157,10 @@ extension FeedbacksTests {
         let sut = Feedbacks {}
         
         // When: adding a feedback that records its execution
-        let newFeedbacks = sut.add(feedback: Feedback(strategy: .continueOnNewState, sideEffect: { (state) -> AnyPublisher<Event, Never> in
+        let newFeedbacks = sut.add(feedback: Feedback(on: AnyState.self, strategy: .continueOnNewState) { state -> AnyPublisher<Event, Never> in
             sideEffectIsExecuted = true
             return Empty().eraseToAnyPublisher()
-        }).execute(on: DispatchQueue.immediateScheduler))
+        }.execute(on: DispatchQueue.immediateScheduler))
         
         // when: executing the feedbacks
         let cancellable = newFeedbacks.eventStream(Just(MockStateA(value: 1)).eraseToAnyPublisher()).sink(receiveValue: { _ in })

@@ -31,10 +31,10 @@ extension GifDetail.System {
             }
 
             Feedbacks {
-                Feedback(strategy: .cancelOnNewState, sideEffect: loadSideEffect)
+                Feedback(on: GifDetail.States.Loading.self, strategy: .cancelOnNewState, sideEffect: loadSideEffect)
                     .execute(on: DispatchQueue(label: "Load Gif Queue"))
 
-                Feedback(strategy: .cancelOnNewState, sideEffect: toggleFavoriteSideEffect)
+                Feedback(on: GifDetail.States.TogglingFavorite.self, strategy: .cancelOnNewState, sideEffect: toggleFavoriteSideEffect)
                     .execute(on: DispatchQueue(label: "Toggle Favorite Queue"))
             }
             .onStateReceived {
