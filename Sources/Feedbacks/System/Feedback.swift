@@ -18,25 +18,10 @@ public struct Feedback {
         case cancelOnNewState
         case continueOnNewState
 
-        func apply<StateType: State>(
-            on sideEffect: @escaping (StateType) -> AnyPublisher<Event, Never>,
+        func apply<Input, Output>(
+            on sideEffect: @escaping (Input) -> AnyPublisher<Output, Never>,
             willExecuteWithStrategy: @escaping (Feedback.Strategy) -> Void = { _ in }
-        ) -> (AnyPublisher<StateType, Never>) -> AnyPublisher<Event, Never> {
-            return { states in
-                willExecuteWithStrategy(self)
-                switch self {
-                case .cancelOnNewState:
-                    return states.map(sideEffect).switchToLatest().eraseToAnyPublisher()
-                case .continueOnNewState:
-                    return states.flatMap(sideEffect).eraseToAnyPublisher()
-                }
-            }
-        }
-
-        func apply(
-            on sideEffect: @escaping (State) -> AnyPublisher<Event, Never>,
-            willExecuteWithStrategy: @escaping (Feedback.Strategy) -> Void = { _ in }
-        ) -> (AnyPublisher<State, Never>) -> AnyPublisher<Event, Never> {
+        ) -> (AnyPublisher<Input, Never>) -> AnyPublisher<Output, Never> {
             return { states in
                 willExecuteWithStrategy(self)
                 switch self {
