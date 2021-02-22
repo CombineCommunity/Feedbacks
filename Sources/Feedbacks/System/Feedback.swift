@@ -45,7 +45,7 @@ public struct Feedback {
     ///   - on: The type of state that should trigger the side effect (forced to AnyState)
     ///   - sideEffect: the side effect to execute in the context of this feedback
     public init(on: AnyState.Type,
-                sideEffect: @escaping (AnyPublisher<State, Never>) -> AnyPublisher<Event, Never>) {
+                perform sideEffect: @escaping (AnyPublisher<State, Never>) -> AnyPublisher<Event, Never>) {
         self.init(sideEffect: sideEffect)
     }
 
@@ -58,8 +58,8 @@ public struct Feedback {
     public init(on: AnyState.Type,
                 strategy: Feedback.Strategy,
                 willExecuteWithStrategy: @escaping (Feedback.Strategy) -> Void = { _ in },
-                sideEffect: @escaping (State) -> AnyPublisher<Event, Never>) {
-        self.init(on: AnyState.self, sideEffect: strategy.apply(on: sideEffect, willExecuteWithStrategy: willExecuteWithStrategy))
+                perform sideEffect: @escaping (State) -> AnyPublisher<Event, Never>) {
+        self.init(on: AnyState.self, perform: strategy.apply(on: sideEffect, willExecuteWithStrategy: willExecuteWithStrategy))
     }
 
     /// Creates a Feedback based on a side effect to execute
@@ -67,7 +67,7 @@ public struct Feedback {
     ///   - on: The type of state that should trigger the side effect
     ///   - sideEffect: the side effect to execute in the context of this feedback
     public init<StateType: State>(on: StateType.Type,
-                                  sideEffect: @escaping (AnyPublisher<StateType, Never>) -> AnyPublisher<Event, Never>) {
+                                  perform sideEffect: @escaping (AnyPublisher<StateType, Never>) -> AnyPublisher<Event, Never>) {
         let wrappingSideEffect: (AnyPublisher<State, Never>) -> AnyPublisher<Event, Never> = { states in
             sideEffect(states.compactMap { $0 as? StateType }.eraseToAnyPublisher())
         }
@@ -83,8 +83,8 @@ public struct Feedback {
     public init<StateType: State>(on: StateType.Type,
                 strategy: Feedback.Strategy,
                 willExecuteWithStrategy: @escaping (Feedback.Strategy) -> Void = { _ in },
-                sideEffect: @escaping (StateType) -> AnyPublisher<Event, Never>) {
-        self.init(on: StateType.self, sideEffect: strategy.apply(on: sideEffect, willExecuteWithStrategy: willExecuteWithStrategy))
+                perform sideEffect: @escaping (StateType) -> AnyPublisher<Event, Never>) {
+        self.init(on: StateType.self, perform: strategy.apply(on: sideEffect, willExecuteWithStrategy: willExecuteWithStrategy))
     }
 }
 

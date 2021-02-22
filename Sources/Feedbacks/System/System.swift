@@ -17,7 +17,7 @@ import Foundation
 public class System {
     let initialState: InitialState
     var feedbacks: Feedbacks
-    let transitions: Transitions
+    public let transitions: Transitions
     var scheduledStream: (AnyPublisher<Event, Never>) -> AnyPublisher<Event, Never>
 
     private var subscriptions = [AnyCancellable]()

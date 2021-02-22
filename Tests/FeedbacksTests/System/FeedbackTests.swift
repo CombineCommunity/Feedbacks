@@ -216,7 +216,7 @@ extension FeedbackTests {
         }
         
         // When: making a Feedback of it, and executing it on the expected Queue
-        let sut = Feedback(on: MockStateA.self, strategy: .continueOnNewState, sideEffect: spySideEffect)
+        let sut = Feedback(on: MockStateA.self, strategy: .continueOnNewState, perform: spySideEffect)
             .execute(on: DispatchQueue(label: expectedQueue))
         
         let cancellable = sut.sideEffect(Just(MockStateA(value: 1)).eraseToAnyPublisher()).sink{ _ in exp.fulfill() }
@@ -244,7 +244,7 @@ extension FeedbackTests {
         }
         
         // When: making a feedback of it, with a disable(:) modifier
-        let sut = Feedback(on: AnyState.self, strategy: .continueOnNewState, sideEffect: spySideEffect).disable { isDisabled }
+        let sut = Feedback(on: AnyState.self, strategy: .continueOnNewState, perform: spySideEffect).disable { isDisabled }
         
         let inputStateStream = PassthroughSubject<State, Never>()
         

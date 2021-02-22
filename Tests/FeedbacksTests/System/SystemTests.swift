@@ -39,7 +39,11 @@ final class SystemTests: XCTestCase {
             }
             
             Transitions {
-                Transition(from: AnyState.self, on: AnyEvent.self, then: { _, _ in MockStateB(value: 1) })
+                From(AnyState.self) { _ in
+                    On(AnyEvent.self) { _ in
+                        MockStateB(value: 1)
+                    }
+                }
             }
         }
         
@@ -90,14 +94,18 @@ final class SystemTests: XCTestCase {
             }
             
             Transitions {
-                Transition(from: MockStateA.self, on: MockNextEvent.self) { state, _ -> State in
-                    receivedSystemQueue.append(DispatchQueue.currentLabel)
-                    return MockStateB(value: state.value)
+                From(MockStateA.self) { state in
+                    On(MockNextEvent.self) { _ in
+                        receivedSystemQueue.append(DispatchQueue.currentLabel)
+                        return MockStateB(value: state.value)
+                    }
                 }
                 
-                Transition(from: MockStateB.self, on: MockNextEvent.self) { state, _ -> State in
-                    receivedSystemQueue.append(DispatchQueue.currentLabel)
-                    return MockStateA(value: state.value + 1)
+                From(MockStateB.self) { state in
+                    On(MockNextEvent.self) { _ in
+                        receivedSystemQueue.append(DispatchQueue.currentLabel)
+                        return MockStateA(value: state.value + 1)
+                    }
                 }
             }
         }
@@ -145,14 +153,18 @@ final class SystemTests: XCTestCase {
             }
             
             Transitions {
-                Transition(from: MockStateA.self, on: MockNextEvent.self) { state, _ -> State in
-                    receivedSystemQueue.append(DispatchQueue.currentLabel)
-                    return MockStateB(value: state.value)
+                From(MockStateA.self) { state in
+                    On(MockNextEvent.self) { _ in
+                        receivedSystemQueue.append(DispatchQueue.currentLabel)
+                        return MockStateB(value: state.value)
+                    }
                 }
                 
-                Transition(from: MockStateB.self, on: MockNextEvent.self) { state, _ -> State in
-                    receivedSystemQueue.append(DispatchQueue.currentLabel)
-                    return MockStateA(value: state.value + 1)
+                From(MockStateB.self) { state in
+                    On(MockNextEvent.self) { _ in
+                        receivedSystemQueue.append(DispatchQueue.currentLabel)
+                        return MockStateA(value: state.value + 1)
+                    }
                 }
             }
         }
@@ -225,20 +237,20 @@ final class SystemTests: XCTestCase {
             }
             
             Transitions {
-                Transition(from: MockStateA.self, on: MockNextEvent.self) { state, _ -> State in
-                    return MockStateB(value: state.value)
+                From(MockStateA.self) { state in
+                    On(MockNextEvent.self) { _ in MockStateB(value: state.value) }
                 }
                 
-                Transition(from: MockStateB.self, on: MockNextEvent.self) { state, _ -> State in
-                    return MockStateC(value: state.value)
+                From(MockStateB.self) { state in
+                    On(MockNextEvent.self) { _ in MockStateC(value: state.value) }
                 }
                 
-                Transition(from: MockStateC.self, on: MockNextEvent.self) { state, _ -> State in
-                    return MockStateD(value: state.value)
+                From(MockStateC.self) { state in
+                    On(MockNextEvent.self) { _ in MockStateD(value: state.value) }
                 }
                 
-                Transition(from: MockStateD.self, on: MockNextEvent.self) { state, _ -> State in
-                    return MockStateA(value: state.value + 1)
+                From(MockStateD.self) { state in
+                    On(MockNextEvent.self) { _ in MockStateA(value: state.value + 1) }
                 }
             }
         }.execute(on: DispatchQueue(label: UUID().uuidString))
@@ -277,7 +289,9 @@ final class SystemTests: XCTestCase {
             }
 
             Transitions {
-                Transition(from: MockStateA.self, on: MockNextEvent.self, then: MockStateB(value: 2))
+                From(MockStateA.self) { _ in
+                    On(MockNextEvent.self) { _ in MockStateB(value: 2) }
+                }
             }
         }
         .execute(on: DispatchQueue.immediateScheduler)
@@ -308,7 +322,9 @@ final class SystemTests: XCTestCase {
             }
             
             Transitions {
-                Transition(from: MockStateA.self, on: MockNextEvent.self, then: MockStateB(value: 2))
+                From(MockStateA.self) {
+                    On(MockNextEvent.self, transitionTo: MockStateB(value: 2))
+                }
             }
         }
         .attach(to: mediator, emitSystemEvent: { $0 == 1701 ? expectedEvent : nil })
@@ -352,7 +368,9 @@ final class SystemTests: XCTestCase {
             }
             
             Transitions {
-                Transition(from: MockStateA.self, on: MockNextEvent.self, then: MockStateB(value: 2))
+                From(MockStateA.self) { _ in
+                    On(MockNextEvent.self) { _ in MockStateB(value: 2) }
+                }
             }
         }
         .attach(to: mediator, onMediatorValue: 1701 , emitSystemEvent: { _ in expectedEvent })
@@ -396,7 +414,9 @@ final class SystemTests: XCTestCase {
             }
 
             Transitions {
-                Transition(from: MockStateA.self, on: MockNextEvent.self, then: MockStateB(value: 2))
+                From(MockStateA.self) { _ in
+                    On(MockNextEvent.self) { _ in MockStateB(value: 2) }
+                }
             }
         }
         .attach(to: mediator, onMediatorValue: 1701 , emitSystemEvent: expectedEvent)
@@ -439,7 +459,9 @@ final class SystemTests: XCTestCase {
             }
             
             Transitions {
-                Transition(from: MockStateA.self, on: MockNextEvent.self, then: MockStateB(value: 2))
+                From(MockStateA.self) { _ in
+                    On(MockNextEvent.self) { _ in MockStateB(value: 2) }
+                }
             }
         }
         .attach(to: mediator,
@@ -490,7 +512,9 @@ final class SystemTests: XCTestCase {
             }
             
             Transitions {
-                Transition(from: MockStateA.self, on: MockNextEvent.self, then: MockStateB(value: 2))
+                From(MockStateA.self) { _ in
+                    On(MockNextEvent.self) { _ in MockStateB(value: 2) }
+                }
             }
         }
         .attach(to: mediator,
@@ -542,7 +566,9 @@ final class SystemTests: XCTestCase {
             }
 
             Transitions {
-                Transition(from: MockStateA.self, on: MockNextEvent.self, then: MockStateB(value: 2))
+                From(MockStateA.self) { _ in
+                    On(MockNextEvent.self) { _ in MockStateB(value: 2) }
+                }
             }
         }
         .attach(to: mediator,
@@ -594,7 +620,9 @@ final class SystemTests: XCTestCase {
             }
             
             Transitions {
-                Transition(from: MockStateA.self, on: MockNextEvent.self, then: MockStateB(value: 2))
+                From(MockStateA.self) {
+                    On(MockNextEvent.self, transitionTo: MockStateB(value: 2))
+                }
             }
         }
         .attach(to: mediator,
@@ -646,7 +674,9 @@ final class SystemTests: XCTestCase {
             }
 
             Transitions {
-                Transition(from: MockStateA.self, on: MockNextEvent.self, then: MockStateB(value: 2))
+                From(MockStateA.self) {
+                    On(MockNextEvent.self, transitionTo: MockStateB(value: 2))
+                }
             }
         }
         .attach(to: mediator,
@@ -703,7 +733,9 @@ final class SystemTests: XCTestCase {
             }
 
             Transitions {
-                Transition(from: MockStateA.self, on: MockNextEvent.self, then: MockStateB(value: randomValue))
+                From(MockStateA.self) {
+                    On(MockNextEvent.self, transitionTo: MockStateB(value: randomValue))
+                }
             }
         }
         .execute(on: DispatchQueue.immediateScheduler)
