@@ -32,34 +32,34 @@ struct DecreaseEvent: Event {}
 let targetedVolume = 15
         
 let system = System {
-	InitialState {
-		    VolumeState(value: 10)
-	}
+  InitialState {
+    VolumeState(value: 10)
+  }
 	
-	Feedbacks {
-		Feedback(on: VolumeState.self, strategy: .continueOnNewState) { state -> AnyPublisher<Event, Never> in
-		    if state.value >= targetedVolume {
-		        return Empty().eraseToAnyPublisher()
-		    }
-		
-		    return Just(IncreaseEvent()).eraseToAnyPublisher()
-		}
-		    
-		Feedback(on: VolumeState.self, strategy: .continueOnNewState) { state -> AnyPublisher<Event, Never> in
-		    if state.value <= targetedVolume {
-		        return Empty().eraseToAnyPublisher()
-		    }
-		
-		    return Just(DecreaseEvent()).eraseToAnyPublisher()
-		}
-	}
+  Feedbacks {
+    Feedback(on: VolumeState.self, strategy: .continueOnNewState) { state -> AnyPublisher<Event, Never> in
+      if state.value >= targetedVolume {
+        return Empty().eraseToAnyPublisher()
+      }
+	
+      return Just(IncreaseEvent()).eraseToAnyPublisher()
+    }
+	    
+    Feedback(on: VolumeState.self, strategy: .continueOnNewState) { state -> AnyPublisher<Event, Never> in
+      if state.value <= targetedVolume {
+        return Empty().eraseToAnyPublisher()
+      }
+	
+      return Just(DecreaseEvent()).eraseToAnyPublisher()
+    }
+  }
 
-	Transitions {
-		From(VolumeState.self) { state in
-			On(IncreaseEvent.self, transitionTo: VolumeState(value: state.value + 1))
-			On(DecreaseEvent.self, transitionTo: VolumeState(value: state.value - 1))
-		}
-	}
+  Transitions {
+    From(VolumeState.self) { state in
+      On(IncreaseEvent.self, transitionTo: VolumeState(value: state.value + 1))
+      On(DecreaseEvent.self, transitionTo: VolumeState(value: state.value - 1))
+    }
+  }
 }
 ```
 
@@ -102,10 +102,10 @@ The declarative syntax of Feedbacks allows to alter the behavior of side effects
 
 ```swift
 Feedbacks {
-    Feedback(on: LoadingState.self, strategy: .continueOnNewState) { state -> AnyPublisher<Event, Never> in
-        performLongRunningOperation()
-	        .map { FinishedLoadingEvent() }
-	        .eraseToAnyPublisher()
+  Feedback(on: LoadingState.self, strategy: .continueOnNewState) { state -> AnyPublisher<Event, Never> in
+    performLongRunningOperation()
+      .map { FinishedLoadingEvent() }
+      .eraseToAnyPublisher()
     }
     .execute(on: DispatchQueue(label: "A background queue"))
 }
@@ -115,13 +115,13 @@ As in SwiftUI, modifiers can be applied to the container:
 
 ```swift
 Feedbacks {
-    Feedback(on: LoadingState.self, strategy: .continueOnNewState) { state -> AnyPublisher<Event, Never> in
-    	...
-    }
+  Feedback(on: LoadingState.self, strategy: .continueOnNewState) { state -> AnyPublisher<Event, Never> in
+    ...
+  }
     
-    Feedback(on: SelectedState.self, strategy: .continueOnNewState) { state -> AnyPublisher<Event, Never> in
-    	...
-    }
+  Feedback(on: SelectedState.self, strategy: .continueOnNewState) { state -> AnyPublisher<Event, Never> in
+    ...
+  }
 }
 .execute(on: DispatchQueue(label: "A background queue"))
 ```
@@ -143,21 +143,23 @@ It is unlikely that a side effect don't need dependencies to perform its job. By
 
 ```swift
 enum MySideEffects {
-	static func load(networkService: NetworkService,
-			 databaseService: DataBaseService,
-			 state: LoadingState) -> AnyPublisher<Event, Never> {
-		networkService
-			.fetch()
-			.map { databaseService.save($0) }
-			.map { LoadedEvent(result: $0) }
-			.eraseToAnyPublisher()
-	}
+  static func load(
+      networkService: NetworkService,
+      databaseService: DataBaseService,
+      state: LoadingState
+  ) -> AnyPublisher<Event, Never> {
+    networkService
+      .fetch()
+      .map { databaseService.save($0) }
+      .map { LoadedEvent(result: $0) }
+      .eraseToAnyPublisher()
+  }
 }
 
 let myNetworkService = MyNetworkService()
 let myDatabaseService = MyDatabaseService()
 let loadingEffect = SideEffect.make(MySideEffects.load, arg1: myNetworkService, arg2: myDatabaseService)
-let feedback = Feedback(on: LoadingState.self, strategy: .cancelOnNewState, sideEffect: loadingEffect)
+let feedback = Feedback(on: LoadingState.self, strategy: .cancelOnNewState, perform: loadingEffect)
 ```
 
 `SideEffect.make()` factories will transform functions with several parameters (up to 6 including the state) into functions with 1 parameter (the state), on the condition of the state being the last one.
@@ -204,13 +206,13 @@ As each modifier returns an updated instance of the target, we can chain them.
 
 ```swift
 Feedback(...)
-	.execute(on: ...)
-	.onStateReceived {
-		...
-	}
-	.onEventEmitted {
-		...
-	}
+  .execute(on: ...)
+  .onStateReceived {
+    ...
+  }
+  .onEventEmitted {
+    ...
+  }
 ```
 
 ## State and Event wildcards
@@ -219,9 +221,9 @@ Although it is recommended to describe all the possible transitions in a state m
 
 ```swift
 Transitions {
-	From(ErrorState.self) {
-		On(AnyEvent.self, transitionTo: LoadingState())
-	}
+  From(ErrorState.self) {
+    On(AnyEvent.self, transitionTo: LoadingState())
+  }
 }
 ```
 
@@ -229,9 +231,9 @@ Considering the state is ErrorState, this transition will produce a LoadingState
 
 ```swift
 Transitions {
-	From(AnyState.self) {
-		On(RefreshEvent.self, transitionTo: LoadingState())
-	}
+  From(AnyState.self) {
+    On(RefreshEvent.self, transitionTo: LoadingState())
+  }
 }
 ```
 
@@ -243,9 +245,9 @@ A Feedback is built from a side effect. A side effect is a function that takes a
 
 ```swift
 Feedback(on: AnyState.self, strategy: .continueOnNewState) { state in
-	...
-	.map { _ in MyEvent() }
-	.eraseToAnyPublisher()
+  ...
+  .map { _ in MyEvent() }
+  .eraseToAnyPublisher()
 }
 ```
 
@@ -253,9 +255,9 @@ This feedback will execute the side effect whatever the type of state that is pr
 
 ```swift
 Feedback(on: LoadingState.self, strategy: .continueOnNewState) { state in
-	...
-	.map { _ in MyEvent() }
-	.eraseToAnyPublisher()
+  ...
+  .map { _ in MyEvent() }
+  .eraseToAnyPublisher()
 }
 ```
 This Feedback will execute the side effect only when it is of type LoadingState.
@@ -266,18 +268,18 @@ The more complex a System, the more we need to add transitions. It's a good prac
 
 ```swift
 let transitions = Transitions {
-    From(LoadingState.self) { state in
-    	On(DataIsLoaded.self) { event in
-    		LoadedState(page: state.page, data: event.data)
-    	}
-		On(LoadingHasFailed.self, transitionTo: ErrorState())
+  From(LoadingState.self) { state in
+    On(DataIsLoaded.self) { event in
+      LoadedState(page: state.page, data: event.data)
     }
+    On(LoadingHasFailed.self, transitionTo: ErrorState())
+  }
     
-    From(LoadedState.self) { state in
-    	On(RefreshEvent.self) {
-    		LoadingState(page: state.page)
-    	}
+  From(LoadedState.self) { state in
+    On(RefreshEvent.self) {
+      LoadingState(page: state.page)
     }
+  }
 }
 ```
 
@@ -285,21 +287,21 @@ or even externalize them into properties:
 
 ```swift
 let loadingTransitions = From(LoadingState.self) { state in
-	On(DataIsLoaded.self) { event in
-		LoadedState(page: state.page, data: event.data)
-	}
-	On(LoadingHasFailed.self, transitionTo: ErrorState())
+  On(DataIsLoaded.self) { event in
+    LoadedState(page: state.page, data: event.data)
+  }
+  On(LoadingHasFailed.self, transitionTo: ErrorState())
 }
     
 let loadedTransitions = From(LoadedState.self) { state in
-	On(RefreshEvent.self) {
-		LoadingState(page: state.page)
-	}
+  On(RefreshEvent.self) {
+    LoadingState(page: state.page)
+  }
 }
 
 let transitions = Transitions {
-    loadingTransitions
-    loadedTransitions
+  loadingTransitions
+  loadedTransitions
 }
 ```
 
@@ -328,11 +330,11 @@ To attach two Systems together:
 let mediator = PassthroughMediator<Int>()
 
 let systemA = System {
-	...
+  ...
 }.attach(to: mediator, onSystemState: LoadedState.self, emitMediatorValue: { _ in 1701 })
 
 let systemB = System {
-	...
+  ...
 }.attach(to: mediator, onMediatorValue: 1701 , emitSystemEvent: { _ in LoadedDoneEvent() }))
 ```
 
@@ -344,19 +346,19 @@ If by chance you have a reference on both Systems, you can attach them without a
 
 ```swift
 let systemA = System {
-	...
+  ...
 }
 
 let systemB = System {
-	...
+  ...
 }
 
 systemA.attach(
-		to: systemB,
-		onSystemStateType: LoadedState.self,
-		emitAttachedSystemEvent: { stateFromA in
-			LoadedEvent(data: stateFromA.data)
-		}
+    to: systemB,
+    onSystemStateType: LoadedState.self,
+    emitAttachedSystemEvent: { stateFromA in
+      LoadedEvent(data: stateFromA.data)
+    }
 )
 ```
 
@@ -383,30 +385,30 @@ Depending on the complexity of your use case, you can use `UISystem` in two ways
 ```swift
 
 enum FeatureViewState: State {
-	case .displayLoading
-	case .displayData(data: Data)
+  case .displayLoading
+  case .displayData(data: Data)
 }
 
 let stateToViewState: (State) -> FeatureViewState = { state in
-	switch (state) {
-	case is LoadingState: return .displayLoading
-	case let loadedState as LoadedState: return .displayData(loadedState.data)
-	...
-	}
+  switch (state) {
+  case is LoadingState: return .displayLoading
+  case let loadedState as LoadedState: return .displayData(loadedState.data)
+  ...
+  }
 }
 
 let system = UISystem(viewStateFactory: stateToViewState) {
-    InitialState {
-    	LoadingState()
-    }
+  InitialState {
+    LoadingState()
+  }
     
-    Feedbacks {
-    	...
-    }
+  Feedbacks {
+    ...
+  }
     
-    Transitions {
-    	...
-    }
+  Transitions {
+    ...
+  }
 }
 ```
 
@@ -414,17 +416,17 @@ Alternatively, we can build a `UISystem` from a traditionnal `System`:
 
 ```swift
 let system = System {
-    InitialState {
-    	LoadingState()
-    }
+  InitialState {
+    LoadingState()
+  }
     
-    Feedbacks {
-    	...
-    }
+  Feedbacks {
+    ...
+  }
     
-    Transitions {
-    	...
-    }
+  Transitions {
+    ...
+  }
 }
 
 let uiSystem = system.uiSystem(viewStateFactory: stateToViewState)
@@ -435,22 +437,22 @@ Once started, we can inject the `uiSystem` into a SwiftUI View:
 ```swift
 struct FeatureView: View {
 
-	@ObservedObject var system: UISystem<FeatureViewState>
+  @ObservedObject var system: UISystem<FeatureViewState>
 
-	var body: some View {
-		switch (self.system.state) {
-		case .displayLoading: ...
-		case let .displayData(data): ...
-		}
-	}
+  var body: some View {
+    switch (self.system.state) {
+    case .displayLoading: ...
+    case let .displayData(data): ...
+    }
+  }
 	
-	var button: some View {
-		Button {
-			Text("Click")
-		} label: {
-			self.system.emit(RefreshEvent())
-		}
-	}
+  var button: some View {
+    Button {
+      Text("Click")
+    } label: {
+      self.system.emit(RefreshEvent())
+    }
+  }
 }
 ```
 
@@ -458,19 +460,19 @@ or into a ViewController:
 
 ```swift
 class FeatureViewController: ViewController {
-	var subscriptions = [AnyCancellable]()
+  var subscriptions = [AnyCancellable]()
 	
-	func viewDidLoad() {
-		self
-		.system
-		.$state
-		.sink { [weak self] state in self?.render(state) }
-		.store(in: &self.subscriptions)
-	}
+  func viewDidLoad() {
+    self
+      .system
+      .$state
+      .sink { [weak self] state in self?.render(state) }
+      .store(in: &self.subscriptions)
+  }
 	
-	func onClick() {
-		self.system.emit(RefreshEvent())
-	}
+  func onClick() {
+    self.system.emit(RefreshEvent())
+  }
 }
 ```
 
