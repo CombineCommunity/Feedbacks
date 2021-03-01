@@ -13,15 +13,23 @@ extension GifList {
 }
 
 extension GifList.States {
-    struct Loading: State {
+    struct Loading: State, Equatable {
         var page: Int = 0
     }
 
-    struct Loaded: State {
+    struct Loaded: State, Equatable {
+        static func == (lhs: GifList.States.Loaded, rhs: GifList.States.Loaded) -> Bool {
+            return
+                lhs.currentPage == rhs.currentPage &&
+                lhs.totalPage == rhs.totalPage &&
+                lhs.gifs.map { $0.0 } == rhs.gifs.map { $0.0 } &&
+                lhs.gifs.map { $0.1 } == rhs.gifs.map { $0.1 }
+        }
+
         let gifs: [(GifOverview, Bool)]
         let currentPage: Int
         let totalPage: Int
     }
 
-    struct Failed: State {}
+    struct Failed: State, Equatable {}
 }

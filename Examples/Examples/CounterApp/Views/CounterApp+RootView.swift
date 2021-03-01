@@ -29,7 +29,7 @@ extension CounterApp {
                 HStack {
                     Spacer()
                     Button(action: {
-                        self.system.emit(CounterApp.Events.Reset(value: 10))
+                        self.system.emit(CounterApp.Events.Reset())
                     }) {
                         Text("Reset")
                             .font(.system(size: 25))
@@ -66,9 +66,9 @@ extension CounterApp {
 
         private func counterValue(from rawState: RawState) -> Int {
             switch rawState.state {
-            case let fixed as CounterApp.States.Fixed: return fixed.value
-            case let decreasing as CounterApp.States.Decreasing: return decreasing.value
-            case let increasing as CounterApp.States.Increasing: return increasing.value
+            case let fixed as CounterApp.States.Fixed: return fixed.counter.value
+            case let decreasing as CounterApp.States.Decreasing: return decreasing.counter.value
+            case let increasing as CounterApp.States.Increasing: return increasing.counter.value
             default: return 0
             }
         }
@@ -99,11 +99,11 @@ extension CounterApp {
         private func counterDescription(from rawState: RawState) -> String {
             switch rawState.state {
             case let fixed as CounterApp.States.Fixed:
-                return "Fixed(value: \(fixed.value))"
+                return "Fixed(value: \(fixed.counter.value))"
             case let decreasing as CounterApp.States.Decreasing:
-                return "Decreasing(value: \(decreasing.value), paused: \(decreasing.isPaused))"
+                return "Decreasing(value: \(decreasing.counter.value), paused: \(decreasing.isPaused))"
             case let increasing as CounterApp.States.Increasing:
-                return "Increasing(value: \(increasing.value), paused: \(increasing.isPaused))"
+                return "Increasing(value: \(increasing.counter.value), paused: \(increasing.isPaused))"
             default: return "undefined"
             }
         }

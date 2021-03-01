@@ -3,10 +3,10 @@
     "pins": [
       {
         "package": "Feedbacks",
-        "repositoryURL": "git@github.com:twittemb/Feedbacks.git",
+        "repositoryURL": "git@github.com:CombineCommunity/Feedbacks.git",
         "state": {
           "branch": null,
-          "revision": "ceca7e90a065cbb67346d0234243f598500ddfc5",
+          "revision": "826c7798699acd5a9d0348049eaeb8917399a94f",
           "version": null
         }
       }

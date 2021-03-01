@@ -13,17 +13,17 @@ extension CounterApp {
 }
 
 extension CounterApp.States {
-    struct Fixed: State {
-        let value: Int
+    struct Fixed: State, Equatable {
+        let counter: Counter
     }
 
-    struct Increasing: State {
-        let value: Int
+    struct Increasing: State, Equatable {
+        let counter: Counter
         let isPaused: Bool
     }
 
-    struct Decreasing: State {
-        let value: Int
+    struct Decreasing: State, Equatable {
+        let counter: Counter
         let isPaused: Bool
     }
 }

@@ -14,13 +14,8 @@ extension CounterApp {
 
 extension CounterApp.Events {
     struct TogglePause: Event {}
-
-    struct Reset: Event {
-        let value: Int
-    }
-
+    struct Reset: Event {}
     struct Increase: Event {}
-
     struct Decrease: Event {}
 }
 

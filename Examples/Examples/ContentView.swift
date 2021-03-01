@@ -24,7 +24,7 @@ struct ContentView: View {
                                destination: GifList.RootView(
                                 system: GifList
                                     .System
-                                    .gifOverview
+                                    .gifs
                                     .uiSystem(viewStateFactory: GifList.ViewState.stateToViewState(state:))
                                     .run()
                                ))
