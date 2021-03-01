@@ -794,8 +794,8 @@
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "git@github.com:CombineCommunity/Feedbacks.git";
 			requirement = {
-				kind = revision;
-				revision = 826c7798699acd5a9d0348049eaeb8917399a94f;
+				kind = exactVersion;
+				version = 0.3.0;
 			};
 		};
 /* End XCRemoteSwiftPackageReference section */
