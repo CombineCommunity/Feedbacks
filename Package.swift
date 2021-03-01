@@ -16,6 +16,9 @@ let package = Package(
         .library(
             name: "Feedbacks",
             targets: ["Feedbacks"]),
+        .library(
+            name: "FeedbacksTest",
+            targets: ["FeedbacksTest"]),
     ],
     dependencies: [
         // Dependencies declare other packages that this package depends on.
@@ -26,9 +29,15 @@ let package = Package(
         // Targets can depend on other targets in this package, and on products in packages this package depends on.
         .target(
             name: "Feedbacks",
-            dependencies: []),
+            dependencies: [],
+            path: "Sources/Feedbacks"),
         .testTarget(
             name: "FeedbacksTests",
-            dependencies: ["Feedbacks", .product(name: "CombineSchedulers", package: "combine-schedulers")]),
+            dependencies: ["Feedbacks", "FeedbacksTest", .product(name: "CombineSchedulers", package: "combine-schedulers")],
+            path: "Tests/FeedbacksTests"),
+        .target(
+            name: "FeedbacksTest",
+            dependencies: ["Feedbacks"],
+            path: "Sources/FeedbacksTest"),
     ]
 )

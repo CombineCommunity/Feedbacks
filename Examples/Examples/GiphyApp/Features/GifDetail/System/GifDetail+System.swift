@@ -31,10 +31,10 @@ extension GifDetail.System {
             }
 
             Feedbacks {
-                Feedback(on: GifDetail.States.Loading.self, strategy: .cancelOnNewState, sideEffect: loadSideEffect)
+                Feedback(on: GifDetail.States.Loading.self, strategy: .cancelOnNewState, perform: loadSideEffect)
                     .execute(on: DispatchQueue(label: "Load Gif Queue"))
 
-                Feedback(on: GifDetail.States.TogglingFavorite.self, strategy: .cancelOnNewState, sideEffect: toggleFavoriteSideEffect)
+                Feedback(on: GifDetail.States.TogglingFavorite.self, strategy: .cancelOnNewState, perform: toggleFavoriteSideEffect)
                     .execute(on: DispatchQueue(label: "Toggle Favorite Queue"))
             }
             .onStateReceived {
@@ -45,9 +45,24 @@ extension GifDetail.System {
             }
 
             Transitions {
-                GifDetail.Transitions.loadingTransitions
-                GifDetail.Transitions.loadedTransition
-                GifDetail.Transitions.togglingTransitions
+                From(GifDetail.States.Loading.self) {
+                    On(GifDetail.Events.LoadingIsComplete.self) { event in
+                        GifDetail.States.Loaded(gif: event.gif, isFavorite: event.isFavorite)
+                    }
+
+                    On(GifDetail.Events.LoadingHasFailed.self, transitionTo: GifDetail.States.Failed())
+                }
+
+                From(GifDetail.States.Loaded.self) { state in
+                    On(GifDetail.Events.ToggleFavorite.self, transitionTo: GifDetail.States.TogglingFavorite(gif: state.gif, isFavorite: !state.isFavorite))
+                }
+
+                From(GifDetail.States.TogglingFavorite.self) {
+                    On(GifDetail.Events.LoadingIsComplete.self) { event in
+                        GifDetail.States.Loaded(gif: event.gif, isFavorite: event.isFavorite)
+                    }
+                    On(GifDetail.Events.LoadingHasFailed.self, transitionTo: GifDetail.States.Failed())
+                }
             }
         }
     }

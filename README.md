@@ -32,37 +32,34 @@ struct DecreaseEvent: Event {}
 let targetedVolume = 15
         
 let system = System {
-    InitialState {
-        VolumeState(value: 10)
-    }
+	InitialState {
+		    VolumeState(value: 10)
+	}
+	
+	Feedbacks {
+		Feedback(on: VolumeState.self, strategy: .continueOnNewState) { state -> AnyPublisher<Event, Never> in
+		    if state.value >= targetedVolume {
+		        return Empty().eraseToAnyPublisher()
+		    }
+		
+		    return Just(IncreaseEvent()).eraseToAnyPublisher()
+		}
+		    
+		Feedback(on: VolumeState.self, strategy: .continueOnNewState) { state -> AnyPublisher<Event, Never> in
+		    if state.value <= targetedVolume {
+		        return Empty().eraseToAnyPublisher()
+		    }
+		
+		    return Just(DecreaseEvent()).eraseToAnyPublisher()
+		}
+	}
 
-    Feedbacks {
-        Feedback(on: VolumeState.self, strategy: .continueOnNewState) { state -> AnyPublisher<Event, Never> in
-            if state.value >= targetedVolume {
-                return Empty().eraseToAnyPublisher()
-            }
-
-            return Just(IncreaseEvent()).eraseToAnyPublisher()
-        }
-        
-        Feedback(on: VolumeState.self, strategy: .continueOnNewState) { state -> AnyPublisher<Event, Never> in
-            if state.value <= targetedVolume {
-                return Empty().eraseToAnyPublisher()
-            }
-
-            return Just(DecreaseEvent()).eraseToAnyPublisher()
-        }
-    }
-
-    Transitions {
-        Transition(from: VolumeState.self, on: IncreaseEvent.self) { state, event -> State in
-            VolumeState(value: state.value + 1)
-        }
-
-        Transition(from: VolumeState.self, on: DecreaseEvent.self) { state, event -> State in
-            VolumeState(value: state.value - 1)
-        }
-    }
+	Transitions {
+		From(VolumeState.self) { state in
+			On(IncreaseEvent.self, transitionTo: VolumeState(value: state.value + 1))
+			On(DecreaseEvent.self, transitionTo: VolumeState(value: state.value - 1))
+		}
+	}
 }
 ```
 
@@ -221,17 +218,24 @@ Feedback(...)
 Although it is recommended to describe all the possible transitions in a state machine, it is still possible to take some shortcuts with wildcards.
 
 ```swift
-Transition(from: ErrorState.self, on: AnyEvent.Self, then: LoadingState())
+Transitions {
+	From(ErrorState.self) {
+		On(AnyEvent.self, transitionTo: LoadingState())
+	}
+}
 ```
 
 Considering the state is ErrorState, this transition will produce a LoadingState whatever event is received.
 
 ```swift
-Transition(from: AnyState.self, on: RefreshEvent.self, then: LoadingState())
+Transitions {
+	From(AnyState.self) {
+		On(RefreshEvent.self, transitionTo: LoadingState())
+	}
+}
 ```
 
 Everytime the RefreshEvent is received, this transition will produce a LoadingState whatever the previous state.
-
 
 ## The different ways of instantiating a Feedback
 
@@ -262,13 +266,17 @@ The more complex a System, the more we need to add transitions. It's a good prac
 
 ```swift
 let transitions = Transitions {
-    Transitions {
-        Transition(from: LoadingState.self, on: DataIsLoaded.self, then: LoadedState())
-        Transition(from: LoadingState.self, on: LoadingHasFailed.self, then: ErrorState())
+    From(LoadingState.self) { state in
+    	On(DataIsLoaded.self) { event in
+    		LoadedState(page: state.page, data: event.data)
+    	}
+		On(LoadingHasFailed.self, transitionTo: ErrorState())
     }
-
-    Transitions {
-        Transition(from: LoadedState.self, on: RefreshEvent.self, then: LoadingState())
+    
+    From(LoadedState.self) { state in
+    	On(RefreshEvent.self) {
+    		LoadingState(page: state.page)
+    	}
     }
 }
 ```
@@ -276,13 +284,17 @@ let transitions = Transitions {
 or even externalize them into properties:
 
 ```swift
-let loadingTransitions = Transitions {
-    Transition(from: LoadingState.self, on: DataIsLoaded.self, then: LoadedState())
-    Transition(from: LoadingState.self, on: LoadingHasFailed.self, then: ErrorState())
+let loadingTransitions = From(LoadingState.self) { state in
+	On(DataIsLoaded.self) { event in
+		LoadedState(page: state.page, data: event.data)
+	}
+	On(LoadingHasFailed.self, transitionTo: ErrorState())
 }
-
-let loadedTransitions = Transitions {
-    Transition(from: LoadedState.self, on: RefreshEvent.self, then: LoadingState())
+    
+let loadedTransitions = From(LoadedState.self) { state in
+	On(RefreshEvent.self) {
+		LoadingState(page: state.page)
+	}
 }
 
 let transitions = Transitions {
@@ -290,6 +302,17 @@ let transitions = Transitions {
     loadedTransitions
 }
 ```
+
+## Unit testing you state machine
+
+In order to ease the testing of your transitions you can import the "FeedbacksTest" library.
+It provides helper functions on the "Transitions" type.
+
+Once you have a system, you can retrieve its transitions: `let transitions = mySystem.transitions`:
+
+* `transitions.assertThat(from: VolumeState(value: 10), on: IncreaseEvent(), newStateIs: VolumeState(value: 11))`
+* `transitions.assertThatStateIsUnchanged(from: Loading(), on: Refresh())`
+
 
 ## How to make Systems communicate?
 

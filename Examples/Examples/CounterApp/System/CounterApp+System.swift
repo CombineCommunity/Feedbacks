@@ -15,17 +15,17 @@ extension CounterApp {
 extension CounterApp.System {
     static let counter = System {
         InitialState {
-            CounterApp.States.Fixed(value: 10)
+            CounterApp.States.Fixed(counter: Counter(value: 10, min: 0, max: 10))
         }
 
         Feedbacks {
             Feedback(on: CounterApp.States.Decreasing.self,
                      strategy: .cancelOnNewState,
-                     sideEffect: CounterApp.SideEffects.decreaseEffect(state:))
+                     perform: CounterApp.SideEffects.decreaseEffect(state:))
 
             Feedback(on: CounterApp.States.Increasing.self,
                      strategy: .cancelOnNewState,
-                     sideEffect: CounterApp.SideEffects.increaseEffect(state:))
+                     perform: CounterApp.SideEffects.increaseEffect(state:))
         }
         .onStateReceived {
             print("Counter: New state has been received: \($0)")
@@ -35,10 +35,37 @@ extension CounterApp.System {
         }
 
         Transitions {
-            CounterApp.Transitions.fixedTransition
-            CounterApp.Transitions.resetTransition
-            CounterApp.Transitions.decreasingTransitions
-            CounterApp.Transitions.increasingTransitions
+            From(CounterApp.States.Fixed.self) { state in
+                On(CounterApp.Events.TogglePause.self, transitionTo: CounterApp.States.Decreasing(counter: state.counter, isPaused: false))
+            }
+
+            From(AnyState.self) {
+                On(CounterApp.Events.Reset.self) {
+                    CounterApp.States.Fixed(counter: Counter(value: 10, min: 0, max: 10))
+                }
+            }
+
+            From(CounterApp.States.Decreasing.self) { state in
+                On(CounterApp.Events.TogglePause.self, transitionTo: CounterApp.States.Decreasing(counter: state.counter, isPaused: !state.isPaused))
+                On(CounterApp.Events.Decrease.self) {
+                    guard !state.isPaused else { return state }
+                    if state.counter.value == state.counter.min {
+                        return CounterApp.States.Increasing(counter: state.counter.increase(), isPaused: false)
+                    }
+                    return CounterApp.States.Decreasing(counter: state.counter.decrease(), isPaused: false)
+                }
+            }
+
+            From(CounterApp.States.Increasing.self) { state in
+                On(CounterApp.Events.TogglePause.self, transitionTo: CounterApp.States.Increasing(counter: state.counter, isPaused: !state.isPaused))
+                On(CounterApp.Events.Increase.self) {
+                    guard !state.isPaused else { return state }
+                    if state.counter.value == state.counter.max {
+                        return CounterApp.States.Decreasing(counter: state.counter.decrease(), isPaused: false)
+                    }
+                    return CounterApp.States.Increasing(counter: state.counter.increase(), isPaused: false)
+                }
+            }
         }
     }
 }

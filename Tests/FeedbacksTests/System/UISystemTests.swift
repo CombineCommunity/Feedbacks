@@ -29,7 +29,9 @@ final class UISystemTests: XCTestCase {
             Feedbacks {}
 
             Transitions {
-                Transition(from: MockState.self, on: MockEvent.self, then: MockState(value: 10))
+                From(MockState.self) { _ in
+                    On(MockEvent.self) { _ in MockState(value: 10) }
+                }
             }
         }
 
@@ -104,7 +106,9 @@ final class UISystemTests: XCTestCase {
             Feedbacks {}
 
             Transitions {
-                Transition(from: MockState.self, on: MockEvent.self, then: mutatedState)
+                From(MockState.self) { _ in
+                    On(MockEvent.self) { _ in mutatedState }
+                }
             }
         }
         .execute(on: DispatchQueue.immediateScheduler)
@@ -142,9 +146,11 @@ final class UISystemTests: XCTestCase {
             }
 
             Transitions {
-                Transition(from: MockState.self, on: MockEvent.self) { _, _ in
-                    receivedQueue = DispatchQueue.currentLabel
-                    return MockState(value: 1)
+                From(MockState.self) { _ in
+                    On(MockEvent.self) { _ in
+                        receivedQueue = DispatchQueue.currentLabel
+                        return MockState(value: 1)
+                    }
                 }
             }
         }
@@ -169,7 +175,9 @@ final class UISystemTests: XCTestCase {
             Feedbacks { }
 
             Transitions {
-                Transition(from: MockState.self, on: MockEvent.self, then: MockState(value: 10))
+                From(MockState.self) { _ in
+                    On(MockEvent.self) { _ in MockState(value: 10) }
+                }
             }
         }
 
@@ -333,7 +341,9 @@ final class UISystemTests: XCTestCase {
             Feedbacks {}
 
             Transitions {
-                Transition(from: MockState.self, on: MockEvent.self, then: mutatedState)
+                From(MockState.self) { _ in
+                    On(MockEvent.self) { _ in mutatedState }
+                }
             }
         }
         .execute(on: DispatchQueue.immediateScheduler)
@@ -376,9 +386,11 @@ final class UISystemTests: XCTestCase {
             }
 
             Transitions {
-                Transition(from: MockState.self, on: MockEvent.self) { _, _ in
-                    receivedQueue = DispatchQueue.currentLabel
-                    return MockState(value: 1)
+                From(MockState.self) { _ in
+                    On(MockEvent.self) { _ in
+                        receivedQueue = DispatchQueue.currentLabel
+                        return MockState(value: 1)
+                    }
                 }
             }
         }
@@ -432,7 +444,9 @@ final class UISystemTests: XCTestCase {
             InitialState { MockState(value: 1) }
             Feedbacks {}
             Transitions {
-                Transition(from: MockState.self, on: MockEvent.self, then: MockState(value: 1))
+                From(MockState.self) { _ in
+                    On(MockEvent.self) { _ in MockState(value: 1) }
+                }
             }
         }
         .execute(on: DispatchQueue.immediateScheduler)

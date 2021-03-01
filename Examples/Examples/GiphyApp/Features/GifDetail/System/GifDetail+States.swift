@@ -12,17 +12,17 @@ extension GifDetail {
 }
 
 extension GifDetail.States {
-    struct Loading: State {}
+    struct Loading: State, Equatable {}
 
-    struct Loaded: State {
+    struct Loaded: State, Equatable {
         let gif: Gif
         let isFavorite: Bool
     }
 
-    struct TogglingFavorite: State {
+    struct TogglingFavorite: State, Equatable {
         let gif: Gif
         let isFavorite: Bool
     }
 
-    struct Failed: State {}
+    struct Failed: State, Equatable {}
 }

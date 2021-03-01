@@ -95,6 +95,6 @@ extension String: Identifiable {
 
 struct GifList_RootView_Previews: PreviewProvider {
     static var previews: some View {
-        GifList.RootView(system: GifList.System.gifOverview.uiSystem(viewStateFactory: GifList.ViewState.stateToViewState(state:)))
+        GifList.RootView(system: GifList.System.gifs.uiSystem(viewStateFactory: GifList.ViewState.stateToViewState(state:)))
     }
 }

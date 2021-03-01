@@ -14,7 +14,7 @@ extension GifList {
 }
 
 extension GifList.System {
-    static var gifOverview : System  {
+    static var gifs : System  {
         let loadSideEffect = SideEffect.make(GifList.SideEffects.load(loadPageFunction:isFavoriteFunction:state:),
                                              arg1: GifList.Dependencies.loadPage(page:),
                                              arg2: GifList.Dependencies.isFavorite(gifOverview:))
@@ -25,7 +25,7 @@ extension GifList.System {
             }
 
             Feedbacks {
-                Feedback(on: GifList.States.Loading.self , strategy: .cancelOnNewState, sideEffect: loadSideEffect)
+                Feedback(on: GifList.States.Loading.self , strategy: .cancelOnNewState, perform: loadSideEffect)
                     .execute(on: DispatchQueue(label: "Load Gifs Queue"))
             }
             .onStateReceived {
@@ -36,9 +36,33 @@ extension GifList.System {
             }
 
             Transitions {
-                GifList.Transitions.loadingTransitions
-                GifList.Transitions.loadedTransitions
-                GifList.Transitions.failedTransition
+                From(GifList.States.Loading.self) {
+                    On(GifList.Events.LoadingIsComplete.self) { event in
+                        GifList.States.Loaded(gifs: event.gifs,
+                                              currentPage: event.currentPage,
+                                              totalPage: event.totalPage)
+                    }
+
+                    On(GifList.Events.LoadingHasFailed.self, transitionTo: GifList.States.Failed())
+                }
+
+                From(GifList.States.Loaded.self) { state in
+                    On(GifList.Events.Refresh.self, transitionTo: GifList.States.Loading(page: state.currentPage))
+
+                    On(GifList.Events.LoadPrevious.self) {
+                        let previousPage = state.currentPage - 1
+                        return GifList.States.Loading(page: previousPage > 0 ? previousPage : 0)
+                    }
+
+                    On(GifList.Events.LoadNext.self) {
+                        let nextPage = state.currentPage + 1
+                        return GifList.States.Loading(page: nextPage < state.totalPage ? nextPage : state.totalPage)
+                    }
+                }
+
+                From(GifList.States.Failed.self) {
+                    On(GifList.Events.Refresh.self, transitionTo: GifList.States.Loading())
+                }
             }
         }
     }
