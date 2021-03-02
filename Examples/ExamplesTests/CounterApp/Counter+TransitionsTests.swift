@@ -45,13 +45,13 @@ final class Counter_TransitionsTests: XCTestCase {
         )
     }
 
-    func testTransitions_fromDecreasing_onDecrease_when_at_min() {
+    func testTransitions_fromDecreasing_onIncrease() {
         let sut = CounterApp.System.counter.transitions
 
         sut.assertThat(
-            from: CounterApp.States.Decreasing(counter: shouldIncreaseMockCounter, isPaused: false),
-            on: CounterApp.Events.Decrease(),
-            newStateIs: CounterApp.States.Increasing(counter: shouldIncreaseMockCounter.increase(), isPaused: false)
+            from: CounterApp.States.Decreasing(counter: mockCounter, isPaused: false),
+            on: CounterApp.Events.Increase(),
+            newStateIs: CounterApp.States.Increasing(counter: mockCounter.increase(), isPaused: false)
         )
     }
 
@@ -75,17 +75,17 @@ final class Counter_TransitionsTests: XCTestCase {
         )
     }
 
-    func testTransitions_fromIncreasing_onIncrease_when_at_max() {
+    func testTransitions_fromIncreasing_onDecrease() {
         let sut = CounterApp.System.counter.transitions
 
         sut.assertThat(
-            from: CounterApp.States.Increasing(counter: shouldDecreaseMockCounter, isPaused: false),
-            on: CounterApp.Events.Increase(),
-            newStateIs: CounterApp.States.Decreasing(counter: shouldDecreaseMockCounter.decrease(), isPaused: false)
+            from: CounterApp.States.Increasing(counter: mockCounter, isPaused: false),
+            on: CounterApp.Events.Decrease(),
+            newStateIs: CounterApp.States.Decreasing(counter: mockCounter.decrease(), isPaused: false)
         )
     }
 
-    func testTransitions_fromAny_onRefresh() {
+    func testTransitions_fromAny_onReset() {
         let sut = CounterApp.System.counter.transitions
 
         let allStates: [State] = [
