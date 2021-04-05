@@ -54,7 +54,7 @@ final class TransitionsTests: XCTestCase {
         // Given: a transition that records its inputs
         let sut = Transitions {
             From(MockState.self) { state in
-                On(MockEvent.self) { event in
+                On(MockEvent.self, transitionTo: MockState.self) { event in
                     receivedState = state
                     receivedEvent = event
                     return MockState(value: 1)
@@ -134,14 +134,14 @@ final class TransitionsTests: XCTestCase {
         // Given: some transitions executed on a scheduler
         let sut = Transitions {
             From(MockState.self) {
-                On(MockEvent.self) {
+                On(MockEvent.self, transitionTo: AnotherMockState.self) {
                     receivedQueue = DispatchQueue.currentLabel
                     return AnotherMockState(value: 1)
                 }
             }
 
             From(AnotherMockState.self) {
-                On(AnotherMockEvent.self) {
+                On(AnotherMockEvent.self, transitionTo: MockState.self) {
                     return MockState(value: 1)
                 }
             }
@@ -169,14 +169,14 @@ final class TransitionsTests: XCTestCase {
         // Given: some transitions executed on 2 schedulers
         let sut = Transitions {
             From(MockState.self) {
-                On(MockEvent.self) {
+                On(MockEvent.self, transitionTo: AnotherMockState.self) {
                     receivedQueue = DispatchQueue.currentLabel
                     return AnotherMockState(value: 1)
                 }
             }
 
             From(AnotherMockState.self) {
-                On(AnotherMockEvent.self) {
+                On(AnotherMockEvent.self, transitionTo: MockState.self) {
                     return MockState(value: 1)
                 }
             }
@@ -195,5 +195,30 @@ final class TransitionsTests: XCTestCase {
         XCTAssertEqual(receivedQueue, expectedQueue.label)
 
         cancellable.cancel()
+    }
+
+    func testDescription_returns_expected_triplets() {
+        let expectedDescription = [("MockState", "AnotherMockState", "MockEvent"),
+                                   ("AnotherMockState", "MockState", "AnotherMockEvent")]
+        let sut = Transitions {
+            From(MockState.self) {
+                On(MockEvent.self, transitionTo: AnotherMockState(value: 1))
+            }
+
+            From(AnotherMockState.self) {
+                On(AnotherMockEvent.self, transitionTo: MockState.self) {
+                    MockState(value: 1)
+                }
+            }
+        }
+
+        let receivedDescription = sut.description
+
+        XCTAssertEqual(receivedDescription[0].0, expectedDescription[0].0)
+        XCTAssertEqual(receivedDescription[0].1, expectedDescription[0].1)
+        XCTAssertEqual(receivedDescription[0].2, expectedDescription[0].2)
+        XCTAssertEqual(receivedDescription[1].0, expectedDescription[1].0)
+        XCTAssertEqual(receivedDescription[1].1, expectedDescription[1].1)
+        XCTAssertEqual(receivedDescription[1].2, expectedDescription[1].2)
     }
 }

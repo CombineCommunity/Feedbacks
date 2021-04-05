@@ -7,6 +7,10 @@
 
 /// A wildcard state to describe a transition that should be executed whatever the state is for a specific event
 ///
-/// `Transition(from: AnyState.self, on: LoadedEvent.self, then: LoadedState())`
+/// `From(AnyState.self) {
+///     On(LoadedEvent.self, transitionTo: LoadedState())
+/// }`
 ///
-public struct AnyState: State {}
+public struct AnyState: State, Instantiable {
+    public static let instance = AnyState()
+}

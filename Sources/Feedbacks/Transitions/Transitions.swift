@@ -51,8 +51,8 @@ public struct Transitions {
 
     static func makeReducer(transitions: [From]) -> (State, Event) -> State {
         let transitionsForStates = transitions.reduce(into: [AnyHashable: (State) -> [AnyHashable: (Event) -> State?]]()) { accumulator, from in
-            let existingTranstionsForState = accumulator[from.id]
-            accumulator[from.id] = { state in from.computeTransitionsForEvents(for: state, existingTranstionsForState: existingTranstionsForState) }
+            let existingTranstionsForState = accumulator[from.stateId]
+            accumulator[from.stateId] = { state in from.computeTransitionsForEvents(for: state, existingTranstionsForState: existingTranstionsForState) }
         }
 
         return { state, event -> State in
@@ -78,6 +78,25 @@ public struct Transitions {
 
             return state
         }
+    }
+
+    /// Provides a description of all the transitions in the form of an array of triplets: ("source state", "destination state", "event")
+    public var description: [(String, String, String)] {
+        var result = [(String, String, String)]()
+        self.transitions.forEach {
+            let source = $0.stateId
+            $0.transitionsForSelfInstantiatedState.forEach {
+                let destination = $0.outputStateId
+                let label = $0.eventId
+                if
+                    let sourceDescription = "\(source)".split(separator: ".").last,
+                    let destinationDescription = "\(destination)".split(separator: ".").last,
+                    let labelDescription = "\(label)".split(separator: ".").last {
+                    result.append((String(sourceDescription), String(destinationDescription), String(labelDescription)))
+                }
+            }
+        }
+        return result
     }
 }
 

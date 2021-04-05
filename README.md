@@ -315,14 +315,14 @@ The more complex a System, the more we need to add transitions. It's a good prac
 ```swift
 let transitions = Transitions {
   From(LoadingState.self) { state in
-    On(DataIsLoaded.self) { event in
+    On(DataIsLoaded.self, transitionTo: LoadedState.self) { event in
       LoadedState(page: state.page, data: event.data)
     }
     On(LoadingHasFailed.self, transitionTo: ErrorState())
   }
     
   From(LoadedState.self) { state in
-    On(RefreshEvent.self) {
+    On(RefreshEvent.self, transitionTo: LoadingState.self) {
       LoadingState(page: state.page)
     }
   }
@@ -333,14 +333,14 @@ or even externalize them into properties:
 
 ```swift
 let loadingTransitions = From(LoadingState.self) { state in
-  On(DataIsLoaded.self) { event in
+  On(DataIsLoaded.self, transitionTo: LoadedState.self) { event in
     LoadedState(page: state.page, data: event.data)
   }
   On(LoadingHasFailed.self, transitionTo: ErrorState())
 }
     
 let loadedTransitions = From(LoadedState.self) { state in
-  On(RefreshEvent.self) {
+  On(RefreshEvent.self, transitionTo: LoadingState.self) {
     LoadingState(page: state.page)
   }
 }

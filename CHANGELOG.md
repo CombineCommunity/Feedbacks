@@ -1,3 +1,7 @@
+**v0.5.0 - Maul**:
+
+- Transitions: enforce the deterministic output state for `On` transitions
+
 **v0.4.0 - Bane**:
 
 - replace CurrentValueSubject by a ReplaySubject in System.stream
