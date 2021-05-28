@@ -1,3 +1,7 @@
+**v0.4.0 - Bane**:
+
+- replace CurrentValueSubject by a ReplaySubject in System.stream
+
 **v0.3.0 - Tyranus**:
 
 - Feedback: introduce the "on:" keyword to explicitly declare the type of state that concerns the side effect
