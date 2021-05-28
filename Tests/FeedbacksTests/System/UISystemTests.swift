@@ -146,8 +146,8 @@ final class UISystemTests: XCTestCase {
             }
 
             Transitions {
-                From(MockState.self) { _ in
-                    On(MockEvent.self) { _ in
+                From(MockState.self) {
+                    On(MockEvent.self) {
                         receivedQueue = DispatchQueue.currentLabel
                         return MockState(value: 1)
                     }
@@ -155,7 +155,7 @@ final class UISystemTests: XCTestCase {
             }
         }
 
-        let cancellable = sut.stream.output(in: 0...0).sink(receiveCompletion: { _ in exp.fulfill()}, receiveValue: { _ in })
+        let cancellable = sut.stream.output(in: 0...1).sink(receiveCompletion: { _ in exp.fulfill()}, receiveValue: { _ in })
 
         sut.emit(MockEvent(value: 1))
 
@@ -386,8 +386,8 @@ final class UISystemTests: XCTestCase {
             }
 
             Transitions {
-                From(MockState.self) { _ in
-                    On(MockEvent.self) { _ in
+                From(MockState.self) {
+                    On(MockEvent.self) {
                         receivedQueue = DispatchQueue.currentLabel
                         return MockState(value: 1)
                     }
@@ -395,7 +395,7 @@ final class UISystemTests: XCTestCase {
             }
         }
 
-        let cancellable = sut.stream.output(in: 0...0).sink(receiveCompletion: { _ in exp.fulfill()}, receiveValue: { _ in })
+        let cancellable = sut.stream.output(in: 0...1).sink(receiveCompletion: { _ in exp.fulfill()}, receiveValue: { _ in })
 
         sut.emit(MockEvent(value: 1))
 

@@ -6,6 +6,7 @@
 //
 
 import Combine
+import CombineExt
 import Dispatch
 import Foundation
 
@@ -62,7 +63,7 @@ public extension System {
     /// Then the feedbacks can publish event that will trigger some transitions, generating a new state, and so on and so forth.
     var stream: AnyPublisher<State, Never> {
         Deferred<AnyPublisher<State, Never>> { [initialState, feedbacks, transitions, scheduledStream] in
-            let currentState = CurrentValueSubject<State, Never>(initialState.value)
+            let currentState = ReplaySubject<State, Never>(bufferSize: 1)
 
             // merging all the effects into one event stream
             let stateInputStream = currentState.eraseToAnyPublisher()
@@ -71,6 +72,7 @@ public extension System {
 
             return scheduledEventStream
                 .scan(initialState.value, transitions.reducer)
+                .prepend(initialState.value)
                 .handleEvents(receiveOutput: currentState.send)
                 .eraseToAnyPublisher()
         }.eraseToAnyPublisher()
