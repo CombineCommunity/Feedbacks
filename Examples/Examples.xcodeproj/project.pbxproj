@@ -7,9 +7,9 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		1A7057E7266167540070FD5D /* Feedbacks in Frameworks */ = {isa = PBXBuildFile; productRef = 1A7057E6266167540070FD5D /* Feedbacks */; };
+		1A7057E9266167950070FD5D /* FeedbacksTest in Frameworks */ = {isa = PBXBuildFile; productRef = 1A7057E8266167950070FD5D /* FeedbacksTest */; };
 		741C474025EC5CDB00F1231B /* Counter+TransitionsTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 741C473F25EC5CDB00F1231B /* Counter+TransitionsTests.swift */; };
-		741C475C25EC5DE100F1231B /* Feedbacks in Frameworks */ = {isa = PBXBuildFile; productRef = 741C475B25EC5DE100F1231B /* Feedbacks */; };
-		741C476625EC5E4C00F1231B /* FeedbacksTest in Frameworks */ = {isa = PBXBuildFile; productRef = 741C476525EC5E4C00F1231B /* FeedbacksTest */; };
 		742FEE2425B388DA00575CB2 /* GifList.swift in Sources */ = {isa = PBXBuildFile; fileRef = 742FEE2325B388DA00575CB2 /* GifList.swift */; };
 		742FEE2825B38B1A00575CB2 /* GifList+States.swift in Sources */ = {isa = PBXBuildFile; fileRef = 742FEE2725B38B1A00575CB2 /* GifList+States.swift */; };
 		742FEE2E25B38EEE00575CB2 /* GifOverview.swift in Sources */ = {isa = PBXBuildFile; fileRef = 742FEE2D25B38EEE00575CB2 /* GifOverview.swift */; };
@@ -66,6 +66,7 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		1A5E6478266166CA00F576A9 /* Feedbacks */ = {isa = PBXFileReference; lastKnownFileType = folder; name = Feedbacks; path = ..; sourceTree = "<group>"; };
 		741C473D25EC5CDB00F1231B /* ExamplesTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = ExamplesTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		741C473F25EC5CDB00F1231B /* Counter+TransitionsTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Counter+TransitionsTests.swift"; sourceTree = "<group>"; };
 		741C474125EC5CDB00F1231B /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
@@ -121,7 +122,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				741C476625EC5E4C00F1231B /* FeedbacksTest in Frameworks */,
+				1A7057E9266167950070FD5D /* FeedbacksTest in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -129,7 +130,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				741C475C25EC5DE100F1231B /* Feedbacks in Frameworks */,
+				1A7057E7266167540070FD5D /* Feedbacks in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -297,6 +298,7 @@
 		7471829725AE7B0B0098E83E = {
 			isa = PBXGroup;
 			children = (
+				1A5E6478266166CA00F576A9 /* Feedbacks */,
 				747182A225AE7B0B0098E83E /* Examples */,
 				741C473E25EC5CDB00F1231B /* ExamplesTests */,
 				747182A125AE7B0B0098E83E /* Products */,
@@ -400,7 +402,7 @@
 			);
 			name = ExamplesTests;
 			packageProductDependencies = (
-				741C476525EC5E4C00F1231B /* FeedbacksTest */,
+				1A7057E8266167950070FD5D /* FeedbacksTest */,
 			);
 			productName = ExamplesTests;
 			productReference = 741C473D25EC5CDB00F1231B /* ExamplesTests.xctest */;
@@ -420,7 +422,7 @@
 			);
 			name = Examples;
 			packageProductDependencies = (
-				741C475B25EC5DE100F1231B /* Feedbacks */,
+				1A7057E6266167540070FD5D /* Feedbacks */,
 			);
 			productName = Examples;
 			productReference = 747182A025AE7B0B0098E83E /* Examples.app */;
@@ -454,7 +456,6 @@
 			);
 			mainGroup = 7471829725AE7B0B0098E83E;
 			packageReferences = (
-				741C475A25EC5DE100F1231B /* XCRemoteSwiftPackageReference "Feedbacks" */,
 			);
 			productRefGroup = 747182A125AE7B0B0098E83E /* Products */;
 			projectDirPath = "";
@@ -789,26 +790,13 @@
 		};
 /* End XCConfigurationList section */
 
-/* Begin XCRemoteSwiftPackageReference section */
-		741C475A25EC5DE100F1231B /* XCRemoteSwiftPackageReference "Feedbacks" */ = {
-			isa = XCRemoteSwiftPackageReference;
-			repositoryURL = "git@github.com:CombineCommunity/Feedbacks.git";
-			requirement = {
-				kind = exactVersion;
-				version = 0.3.0;
-			};
-		};
-/* End XCRemoteSwiftPackageReference section */
-
 /* Begin XCSwiftPackageProductDependency section */
-		741C475B25EC5DE100F1231B /* Feedbacks */ = {
+		1A7057E6266167540070FD5D /* Feedbacks */ = {
 			isa = XCSwiftPackageProductDependency;
-			package = 741C475A25EC5DE100F1231B /* XCRemoteSwiftPackageReference "Feedbacks" */;
 			productName = Feedbacks;
 		};
-		741C476525EC5E4C00F1231B /* FeedbacksTest */ = {
+		1A7057E8266167950070FD5D /* FeedbacksTest */ = {
 			isa = XCSwiftPackageProductDependency;
-			package = 741C475A25EC5DE100F1231B /* XCRemoteSwiftPackageReference "Feedbacks" */;
 			productName = FeedbacksTest;
 		};
 /* End XCSwiftPackageProductDependency section */

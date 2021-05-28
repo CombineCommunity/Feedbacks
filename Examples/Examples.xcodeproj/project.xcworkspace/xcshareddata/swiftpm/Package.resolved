@@ -2,12 +2,21 @@
   "object": {
     "pins": [
       {
-        "package": "Feedbacks",
-        "repositoryURL": "git@github.com:CombineCommunity/Feedbacks.git",
+        "package": "combine-schedulers",
+        "repositoryURL": "https://github.com/pointfreeco/combine-schedulers.git",
         "state": {
           "branch": null,
-          "revision": "9d8ba9b4ada327b1f88401b822454770a6b65263",
-          "version": "0.3.0"
+          "revision": "ff42ec9061d864de7982162011321d3df5080c10",
+          "version": "0.1.2"
+        }
+      },
+      {
+        "package": "CombineExt",
+        "repositoryURL": "https://github.com/CombineCommunity/CombineExt.git",
+        "state": {
+          "branch": null,
+          "revision": "5b8a0c0f178527f9204200505c5fefa6847e528f",
+          "version": "1.3.0"
         }
       }
     ]
