@@ -96,9 +96,9 @@ In our example, one feedback takes care of increasing the volume and the other i
 
 ## Scheduling
 
-Threading is very important to make a nice responsive application. A Scheduler is the Combine way of handling threading by switching portions of reactive streams on dispatch queues, or operation queues or RunLoops.
+Threading is very important to make a nice responsive application. A Scheduler is the Combine way of handling threading by switching portions of reactive streams on dispatch queues, operation queues or RunLoops.
 
-The declarative syntax of Feedbacks allows to alter the behavior of side effects by simply applying modifiers (like you would do with SwiftUI to change the frame for instance). Modifying the scheduling of a side effect is as simple as calling the `.execute(on:)` modifier.
+The declarative syntax of Feedbacks allows to alter the behavior of a System by simply applying modifiers (like you would do with SwiftUI to change the frame for instance). Modifying the scheduling of a side effect is as simple as calling the `.execute(on:)` modifier.
 
 ```swift
 Feedbacks {
@@ -127,6 +127,52 @@ Feedbacks {
 ```
 
 Both side effects will be executed on the background queue.
+
+It is also applicable to the transitions:
+
+```swift
+Transitions {
+  From(VolumeState.self) { state in
+    On(IncreaseEvent.self, transitionTo: VolumeState(value: state.value + 1))
+    On(DecreaseEvent.self, transitionTo: VolumeState(value: state.value - 1))
+  }
+}.execute(on: DispatchQueue(label: "A background queue"))
+```
+
+ or to the whole system:
+ 
+ ```swift
+ System {
+  InitialState {
+    VolumeState(value: 10)
+  }
+	
+  Feedbacks {
+    Feedback(on: VolumeState.self, strategy: .continueOnNewState) { state -> AnyPublisher<Event, Never> in
+      if state.value >= targetedVolume {
+        return Empty().eraseToAnyPublisher()
+      }
+	
+      return Just(IncreaseEvent()).eraseToAnyPublisher()
+    }
+	    
+    Feedback(on: VolumeState.self, strategy: .continueOnNewState) { state -> AnyPublisher<Event, Never> in
+      if state.value <= targetedVolume {
+        return Empty().eraseToAnyPublisher()
+      }
+	
+      return Just(DecreaseEvent()).eraseToAnyPublisher()
+    }
+  }
+
+  Transitions {
+    From(VolumeState.self) { state in
+      On(IncreaseEvent.self, transitionTo: VolumeState(value: state.value + 1))
+      On(DecreaseEvent.self, transitionTo: VolumeState(value: state.value - 1))
+    }
+  }
+}.execute(on: DispatchQueue(label: "A background queue"))
+ ```
 
 ## Lifecycle
 
@@ -196,9 +242,9 @@ Here is a list of the supported modifiers:
 | Modifier | Action | Can be applied to |
 | -------------- | -------------- | -------------- |
 | `.disable(disabled:)`| The target won't be executed as long as the `disabled` condition is true | <ul align="left"><li>Transition</li><li>Transitions</li><li>Feedback</li></ul> |
-| `.execute(on:)`| The target will be executed on the scheduler | <ul align="left"><li>Feedbacks</li><li>Feedback</li></ul> |
-| `.onStateReceived(perform:)`| Execute the `perform` closure each time a new state is given as an input | <ul align="left"><li>Feedbacks</li><li>Feedback</li></ul> |
-| `.onEventEmitted(perform:)`| Execute the `perform` closure each time a new event is emitted | <ul align="left"><li>Feedbacks</li><li>Feedback</li></ul> |
+| `.execute(on:)`| The target will be executed on the scheduler | <ul align="left"><li>Transitions</li><li>Feedback</li><li>Feedbacks</li><li>System</li></ul> |
+| `.onStateReceived(perform:)`| Execute the `perform` closure each time a new state is given as an input | <ul align="left"><li>Feedback</li><li>Feedbacks</li></ul> |
+| `.onEventEmitted(perform:)`| Execute the `perform` closure each time a new event is emitted | <ul align="left"><li>Feedback</li><li>Feedbacks</li></ul> |
 | `.attach(to:)`| Refer to the "How to make systems communicate" section | <ul align="left"><li>System</li><li>UISystem</li></ul> |
 | `.uiSystem(viewStateFactory:)`| Refer to the "Using Feedbacks with SwiftUI and UIKit" section | <ul align="left"><li>System</li></ul> |
 
