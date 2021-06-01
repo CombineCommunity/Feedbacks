@@ -32,10 +32,7 @@ extension GifDetail.System {
 
             Feedbacks {
                 Feedback(on: GifDetail.States.Loading.self, strategy: .cancelOnNewState, perform: loadSideEffect)
-                    .execute(on: DispatchQueue(label: "Load Gif Queue"))
-
                 Feedback(on: GifDetail.States.TogglingFavorite.self, strategy: .cancelOnNewState, perform: toggleFavoriteSideEffect)
-                    .execute(on: DispatchQueue(label: "Toggle Favorite Queue"))
             }
             .onStateReceived {
                 print("GifDetail: New state has been received: \($0)")
@@ -64,6 +61,6 @@ extension GifDetail.System {
                     On(GifDetail.Events.LoadingHasFailed.self, transitionTo: GifDetail.States.Failed())
                 }
             }
-        }
+        }.execute(on: DispatchQueue(label: "Load Gif Queue"))
     }
 }

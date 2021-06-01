@@ -34,7 +34,10 @@ final class SystemTests: XCTestCase {
             Feedbacks {
                 Feedback(on: AnyState.self, strategy: .continueOnNewState) { state -> AnyPublisher<Event, Never> in
                     receivedStates.append(state)
-                    return Just<Event>(MockNextEvent()).eraseToAnyPublisher()
+                    if receivedStates.count > 1 {
+                        return Empty<Event, Never>().eraseToAnyPublisher()
+                    }
+                    return Just<Event>(MockEventA(value: 1)).eraseToAnyPublisher()
                 }
             }
             
@@ -45,7 +48,7 @@ final class SystemTests: XCTestCase {
                     }
                 }
             }
-        }
+        }.execute(on: DispatchQueue.immediateScheduler)
         
         // When: executing the system and completing after a first state is processed
         let cancellable = sut
@@ -66,12 +69,12 @@ final class SystemTests: XCTestCase {
         
         let expectedFeedbackAQueue = "FEEDBACKA-\(UUID().uuidString)"
         let expectedFeedbackBQueue = "FEEDBACKB-\(UUID().uuidString)"
-        let expectedSystemQueue = "SYSTEM-\(UUID().uuidString)"
-        
+        let expectedTransitionsQueue = "TRANSITIONS-\(UUID().uuidString)"
+
         var receivedFeedbackAQueue = [String]()
         var receivedFeedbackBQueue = [String]()
-        var receivedSystemQueue = [String]()
-        
+        var receivedTransitionsQueue = [String]()
+
         // Given: a system recording the execution queues for side effects and reducer
         // Given: a system that executes side effects and reducer on dedicated schedulers
         @SystemBuilder var system: System {
@@ -96,21 +99,21 @@ final class SystemTests: XCTestCase {
             Transitions {
                 From(MockStateA.self) { state in
                     On(MockNextEvent.self) { _ in
-                        receivedSystemQueue.append(DispatchQueue.currentLabel)
+                        receivedTransitionsQueue.append(DispatchQueue.currentLabel)
                         return MockStateB(value: state.value)
                     }
                 }
                 
                 From(MockStateB.self) { state in
                     On(MockNextEvent.self) { _ in
-                        receivedSystemQueue.append(DispatchQueue.currentLabel)
+                        receivedTransitionsQueue.append(DispatchQueue.currentLabel)
                         return MockStateA(value: state.value + 1)
                     }
                 }
-            }
+            }.execute(on: DispatchQueue(label: expectedTransitionsQueue))
         }
 
-        let sut = system.execute(on: DispatchQueue(label: expectedSystemQueue))
+        let sut = system.execute(on: DispatchQueue(label: "SYSTEM-\(UUID().uuidString)"))
         
         // When: executing that system
         let cancellable = sut
@@ -121,9 +124,10 @@ final class SystemTests: XCTestCase {
         waitForExpectations(timeout: 0.5)
         
         // Then: the side effects and reducers happen on the expected queues
+        // the system scheduler has no effect
         receivedFeedbackAQueue.forEach { XCTAssertEqual($0, expectedFeedbackAQueue) }
         receivedFeedbackBQueue.forEach { XCTAssertEqual($0, expectedFeedbackBQueue) }
-        receivedSystemQueue.forEach { XCTAssertEqual($0, expectedSystemQueue) }
+        receivedTransitionsQueue.forEach { XCTAssertEqual($0, expectedTransitionsQueue) }
         
         cancellable.cancel()
     }
@@ -131,7 +135,7 @@ final class SystemTests: XCTestCase {
     func testStream_make_a_stream_that_execute_on_systemScheduler() {
         let exp = expectation(description: "Schedulers")
         
-        let expectedReducerQueue = "SYSTEM-\(UUID().uuidString)"
+        let expectedSystemQueue = "SYSTEM-\(UUID().uuidString)"
         var receivedSystemQueue = [String]()
         
         // Given: a system recording the execution queues for side effects and reducer
@@ -168,7 +172,7 @@ final class SystemTests: XCTestCase {
                 }
             }
         }
-        .execute(on: DispatchQueue(label: expectedReducerQueue))
+        .execute(on: DispatchQueue(label: expectedSystemQueue))
         
         // When: executing that system on a unique scheduler
         let cancellable = sut
@@ -179,7 +183,7 @@ final class SystemTests: XCTestCase {
         waitForExpectations(timeout: 0.5)
         
         // Then: the side effects and reducers happen on the expected queue
-        receivedSystemQueue.forEach { XCTAssertEqual($0, expectedReducerQueue) }
+        receivedSystemQueue.forEach { XCTAssertEqual($0, expectedSystemQueue) }
         
         cancellable.cancel()
     }
@@ -297,7 +301,7 @@ final class SystemTests: XCTestCase {
         .execute(on: DispatchQueue.immediateScheduler)
 
         // When: running it
-        let newSystem = sut.run()
+        let newSystem = sut.run(subscribeOn: DispatchQueue.immediateScheduler)
 
         // Then: the system is started
         XCTAssertTrue(streamIsStarted)

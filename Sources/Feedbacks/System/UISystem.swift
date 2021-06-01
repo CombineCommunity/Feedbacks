@@ -42,31 +42,22 @@ public class UISystem<PublishedState: State>: System, ObservableObject {
 
         self.init(initialState: initialState,
                   feedbacks: feedbacks,
-                  transitions: transitions,
-                  scheduledStream: { (events: AnyPublisher<Event, Never>) in
-                    events
-                        .subscribe(on: System.defaultQueue)
-                        .receive(on: System.defaultQueue)
-                        .eraseToAnyPublisher()
-                  })
+                  transitions: transitions)
     }
 
     convenience init(system: System) where PublishedState == RawState {
         self.init(initialState: system.initialState,
                   feedbacks: system.feedbacks,
-                  transitions: system.transitions,
-                  scheduledStream: system.scheduledStream)
+                  transitions: system.transitions)
     }
 
     override init(initialState: InitialState,
          feedbacks: Feedbacks,
-         transitions: Transitions,
-         scheduledStream: @escaping (AnyPublisher<Event, Never>) -> AnyPublisher<Event, Never>) where PublishedState == RawState {
+         transitions: Transitions) where PublishedState == RawState {
         self.state = RawState(state: initialState.value)
         super.init(initialState: initialState,
                    feedbacks: feedbacks,
-                   transitions: transitions,
-                   scheduledStream: scheduledStream)
+                   transitions: transitions)
 
         let stateFeedback = Self.makeStatePublishingFeedback(publishingFunction: { [weak self] in
             self?.state = $0
@@ -76,7 +67,9 @@ public class UISystem<PublishedState: State>: System, ObservableObject {
             events.eraseToAnyPublisher()
         }
 
-        self.feedbacks = self.feedbacks.add(feedback: stateFeedback).add(feedback: eventFeedback)
+        self.feedbacks = self.feedbacks
+            .add(feedback: stateFeedback)
+            .add(feedback: eventFeedback)
     }
 
     /// Creates a UISystem based on the 3 components of a System (initial state, feedbacks, state machine) and a View State factory function
@@ -85,7 +78,7 @@ public class UISystem<PublishedState: State>: System, ObservableObject {
     ///   - system: the 3 components of the System
     public convenience init(
         viewStateFactory: @escaping (State) -> PublishedState,
-                            @SystemBuilder _ components: () -> (InitialState, Feedbacks, Transitions)
+        @SystemBuilder _ components: () -> (InitialState, Feedbacks, Transitions)
     ) where PublishedState: ViewState {
         self.init(viewStateFactory: viewStateFactory,
                   on: DispatchQueue(label: "Feedbacks.UISystem.\(UUID().uuidString)"),
@@ -99,8 +92,8 @@ public class UISystem<PublishedState: State>: System, ObservableObject {
     ///   - system: the 3 components of the System
     public convenience init<SchedulerType: Scheduler>(
         viewStateFactory: @escaping (State) -> PublishedState,
-                                                      on scheduler: SchedulerType,
-                                                      @SystemBuilder _ components: () -> (InitialState, Feedbacks, Transitions)
+        on scheduler: SchedulerType,
+        @SystemBuilder _ components: () -> (InitialState, Feedbacks, Transitions)
     ) where PublishedState: ViewState {
         let (initialState, feedbacks, transitions) = System.decode(builder: components)
 
@@ -108,12 +101,6 @@ public class UISystem<PublishedState: State>: System, ObservableObject {
                   initialState: initialState,
                   feedbacks: feedbacks,
                   transitions: transitions,
-                  scheduledStream: { (events: AnyPublisher<Event, Never>) in
-                    events
-                        .subscribe(on: System.defaultQueue)
-                        .receive(on: System.defaultQueue)
-                        .eraseToAnyPublisher()
-                  },
                   viewStateScheduler: scheduler)
     }
 
@@ -131,7 +118,6 @@ public class UISystem<PublishedState: State>: System, ObservableObject {
                   initialState: system.initialState,
                   feedbacks: system.feedbacks,
                   transitions: system.transitions,
-                  scheduledStream: system.scheduledStream,
                   viewStateScheduler: scheduler)
     }
 
@@ -140,14 +126,13 @@ public class UISystem<PublishedState: State>: System, ObservableObject {
         initialState: InitialState,
         feedbacks: Feedbacks,
         transitions: Transitions,
-        scheduledStream: @escaping (AnyPublisher<Event, Never>) -> AnyPublisher<Event, Never>,
         viewStateScheduler: ViewStateSchedulerType
     ) where PublishedState: ViewState {
         // since the initial view state is calculated asynchronously on the viewStateScheduler when the system is started
         // we set it to a initial undefined value
         self.state = PublishedState.undefined
 
-        super.init(initialState: initialState, feedbacks: feedbacks, transitions: transitions, scheduledStream: scheduledStream)
+        super.init(initialState: initialState, feedbacks: feedbacks, transitions: transitions)
 
         let stateFeedback = Self.makeStatePublishingFeedback(
             viewStateFactory: viewStateFactory,
