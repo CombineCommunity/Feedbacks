@@ -5,6 +5,7 @@
 //  Created by Thibault Wittemberg on 2020-12-24.
 //
 
+import Combine
 import Feedbacks
 import FeedbacksTest
 import XCTest
@@ -122,5 +123,77 @@ final class TransitionsTests: XCTestCase {
         // Then: the state machine returns the input state
         sut.assertThatStateIsUnchanged(from: MockState(value: Int.random(in: 0...1_000_000)), on: MockEvent(value: 1))
         sut.assertThatStateIsUnchanged(from: AnotherMockState(value: Int.random(in: 0...1_000_000)), on: AnotherMockEvent())
+    }
+
+    func testExecute_runs_reducer_on_expected_scheduler() {
+        let exp = expectation(description: "reducer scheduler")
+
+        let expectedQueue = DispatchQueue(label: "TRANSITIONS.\(UUID().uuidString)")
+        var receivedQueue: String?
+
+        // Given: some transitions executed on a scheduler
+        let sut = Transitions {
+            From(MockState.self) {
+                On(MockEvent.self) {
+                    receivedQueue = DispatchQueue.currentLabel
+                    return AnotherMockState(value: 1)
+                }
+            }
+
+            From(AnotherMockState.self) {
+                On(AnotherMockEvent.self) {
+                    return MockState(value: 1)
+                }
+            }
+        }.execute(on: expectedQueue)
+
+        // When: running the transitions
+        let cancellable = sut
+            .scheduledReducer(MockState(value: 1), Just<Event>(MockEvent(value: 1)).setFailureType(to: Never.self).eraseToAnyPublisher())
+            .sink(receiveValue: { _ in exp.fulfill() })
+
+        waitForExpectations(timeout: 0.5)
+
+        // Then: the transitions are executed on the expected scheduler
+        XCTAssertEqual(receivedQueue, expectedQueue.label)
+
+        cancellable.cancel()
+    }
+
+    func testExecute_runs_on_the_inner_scheduler() {
+        let exp = expectation(description: "reducer inner scheduler")
+
+        let expectedQueue = DispatchQueue(label: "TRANSITIONS.\(UUID().uuidString)")
+        var receivedQueue: String?
+
+        // Given: some transitions executed on 2 schedulers
+        let sut = Transitions {
+            From(MockState.self) {
+                On(MockEvent.self) {
+                    receivedQueue = DispatchQueue.currentLabel
+                    return AnotherMockState(value: 1)
+                }
+            }
+
+            From(AnotherMockState.self) {
+                On(AnotherMockEvent.self) {
+                    return MockState(value: 1)
+                }
+            }
+        }
+        .execute(on: expectedQueue)
+        .execute(on: DispatchQueue(label: UUID().uuidString))
+
+        // When: running the transitions
+        let cancellable = sut
+            .scheduledReducer(MockState(value: 1), Just<Event>(MockEvent(value: 1)).setFailureType(to: Never.self).eraseToAnyPublisher())
+            .sink(receiveValue: { _ in exp.fulfill() })
+
+        waitForExpectations(timeout: 0.5)
+
+        // Then: the transitions are executed on the inner scheduler
+        XCTAssertEqual(receivedQueue, expectedQueue.label)
+
+        cancellable.cancel()
     }
 }

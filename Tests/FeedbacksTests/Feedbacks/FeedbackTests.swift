@@ -228,6 +228,33 @@ extension FeedbackTests {
         
         cancellable.cancel()
     }
+
+    func testExecute_execute_sideEffect_on_the_inner_scheduler() {
+        let exp = expectation(description: "Feedback.execute(on:)")
+
+        let expectedQueue = UUID().uuidString
+        var receivedQueue = ""
+
+        // Given: a side effect recording its execution queue
+        let spySideEffect: (MockStateA) -> AnyPublisher<Event, Never> = { state in
+            receivedQueue = DispatchQueue.currentLabel
+            return Just(MockEventA(value: 1)).eraseToAnyPublisher()
+        }
+
+        // When: making a Feedback of it, and executing it on the expected Queue
+        let sut = Feedback(on: MockStateA.self, strategy: .continueOnNewState, perform: spySideEffect)
+            .execute(on: DispatchQueue(label: expectedQueue))
+            .execute(on: DispatchQueue(label: UUID().uuidString))
+
+        let cancellable = sut.sideEffect(Just(MockStateA(value: 1)).eraseToAnyPublisher()).sink{ _ in exp.fulfill() }
+
+        waitForExpectations(timeout: 0.5)
+
+        // Then: the side effect is executed on the inner scheduler
+        XCTAssertEqual(receivedQueue, expectedQueue)
+
+        cancellable.cancel()
+    }
 }
 
 // MARK: tests for Feedback.disable(:)

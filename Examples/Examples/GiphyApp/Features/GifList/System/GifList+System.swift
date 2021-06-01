@@ -26,7 +26,6 @@ extension GifList.System {
 
             Feedbacks {
                 Feedback(on: GifList.States.Loading.self , strategy: .cancelOnNewState, perform: loadSideEffect)
-                    .execute(on: DispatchQueue(label: "Load Gifs Queue"))
             }
             .onStateReceived {
                 print("GifList: New state has been received: \($0)")
@@ -64,6 +63,6 @@ extension GifList.System {
                     On(GifList.Events.Refresh.self, transitionTo: GifList.States.Loading())
                 }
             }
-        }
+        }.execute(on: DispatchQueue(label: "Load Gifs Queue"))
     }
 }

@@ -127,45 +127,6 @@ final class UISystemTests: XCTestCase {
         stateCancellable.cancel()
     }
 
-    func testUISystem_for_rawState_execute_system_on_default_background_queue() {
-        let exp = expectation(description: "execute on default queue")
-
-        let expectedQueue = System.defaultQueue.label
-        var receivedQueue = ""
-
-        // Given: a RawState UISystem
-        let sut = UISystem {
-            InitialState {
-                MockState(value: Int.random(in: 0...1_000_000))
-            }
-
-            Feedbacks {
-                Feedback(on: MockState.self, strategy: .continueOnNewState) { state in
-                    return Just<Event>(MockEvent(value: 1)).setFailureType(to: Never.self).eraseToAnyPublisher()
-                }
-            }
-
-            Transitions {
-                From(MockState.self) { _ in
-                    On(MockEvent.self) { _ in
-                        receivedQueue = DispatchQueue.currentLabel
-                        return MockState(value: 1)
-                    }
-                }
-            }
-        }
-
-        let cancellable = sut.stream.output(in: 0...0).sink(receiveCompletion: { _ in exp.fulfill()}, receiveValue: { _ in })
-
-        sut.emit(MockEvent(value: 1))
-
-        waitForExpectations(timeout: 0.5)
-
-        XCTAssertEqual(receivedQueue, expectedQueue)
-
-        cancellable.cancel()
-    }
-
     func testUISystem_provide_a_decorator_for_viewState() {
         // Given: a system
         let sut = System {
@@ -365,45 +326,6 @@ final class UISystemTests: XCTestCase {
 
         cancellable.cancel()
         stateCancellable.cancel()
-    }
-
-    func testUISystem_for_viewState_execute_system_on_default_background_queue() {
-        let exp = expectation(description: "execute on default queue")
-
-        let expectedQueue = System.defaultQueue.label
-        var receivedQueue = ""
-
-        // Given: a ViewState UISystem
-        let sut = UISystem(viewStateFactory: { _ in MockViewState(value: 1)}) {
-            InitialState {
-                MockState(value: Int.random(in: 0...1_000_000))
-            }
-
-            Feedbacks {
-                Feedback(on: MockState.self, strategy: .continueOnNewState) { state in
-                    return Just<Event>(MockEvent(value: 1)).setFailureType(to: Never.self).eraseToAnyPublisher()
-                }
-            }
-
-            Transitions {
-                From(MockState.self) { _ in
-                    On(MockEvent.self) { _ in
-                        receivedQueue = DispatchQueue.currentLabel
-                        return MockState(value: 1)
-                    }
-                }
-            }
-        }
-
-        let cancellable = sut.stream.output(in: 0...0).sink(receiveCompletion: { _ in exp.fulfill()}, receiveValue: { _ in })
-
-        sut.emit(MockEvent(value: 1))
-
-        waitForExpectations(timeout: 0.5)
-
-        XCTAssertEqual(receivedQueue, expectedQueue)
-
-        cancellable.cancel()
     }
 
     func testUISystem_output_an_event_when_emit_is_called() {

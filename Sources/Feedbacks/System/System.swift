@@ -6,6 +6,7 @@
 //
 
 import Combine
+import CombineExt
 import Dispatch
 import Foundation
 
@@ -17,12 +18,9 @@ import Foundation
 public class System {
     let initialState: InitialState
     var feedbacks: Feedbacks
-    public let transitions: Transitions
-    var scheduledStream: (AnyPublisher<Event, Never>) -> AnyPublisher<Event, Never>
+    public private(set) var transitions: Transitions
 
     private var subscriptions = [AnyCancellable]()
-
-    static let defaultQueue = DispatchQueue(label: "Feedbacks.System.\(UUID().uuidString)")
 
     /// Builds a System based on its three components: an initial state, some feedbacks, a state machine
     /// By default, the System will be executed an a serial background queue. This can be altered thanks to the `.execute(on:)` modifier.
@@ -31,23 +29,15 @@ public class System {
         let (initialState, feedbacks, transitions) = System.decode(builder: components)
         self.init(initialState: initialState,
                   feedbacks: feedbacks,
-                  transitions: transitions,
-                  scheduledStream: { (events: AnyPublisher<Event, Never>) in
-                    events
-                        .subscribe(on: System.defaultQueue)
-                        .receive(on: System.defaultQueue)
-                        .eraseToAnyPublisher()
-                  })
+                  transitions: transitions)
     }
 
     init(initialState: InitialState,
          feedbacks: Feedbacks,
-         transitions: Transitions,
-         scheduledStream: @escaping (AnyPublisher<Event, Never>) -> AnyPublisher<Event, Never>) {
+         transitions: Transitions) {
         self.initialState = initialState
         self.feedbacks = feedbacks
         self.transitions = transitions
-        self.scheduledStream = scheduledStream
     }
 
     static func decode(builder system: () -> (InitialState, Feedbacks, Transitions)) -> (InitialState, Feedbacks, Transitions) {
@@ -61,16 +51,15 @@ public extension System {
     /// Once this stream has been subscribed to, the initial state is given as an input to the feedbacks.
     /// Then the feedbacks can publish event that will trigger some transitions, generating a new state, and so on and so forth.
     var stream: AnyPublisher<State, Never> {
-        Deferred<AnyPublisher<State, Never>> { [initialState, feedbacks, transitions, scheduledStream] in
-            let currentState = CurrentValueSubject<State, Never>(initialState.value)
+        Deferred<AnyPublisher<State, Never>> { [initialState, feedbacks, transitions] in
+            let currentState = ReplaySubject<State, Never>(bufferSize: 1)
 
             // merging all the effects into one event stream
             let stateInputStream = currentState.eraseToAnyPublisher()
             let eventStream = feedbacks.eventStream(stateInputStream)
-            let scheduledEventStream = scheduledStream(eventStream)
 
-            return scheduledEventStream
-                .scan(initialState.value, transitions.reducer)
+            return transitions.scheduledReducer(initialState.value, eventStream)
+                .prepend(initialState.value)
                 .handleEvents(receiveOutput: currentState.send)
                 .eraseToAnyPublisher()
         }.eraseToAnyPublisher()
@@ -83,6 +72,14 @@ public extension System {
         self.stream.sink(receiveValue: { _ in }).store(in: &self.subscriptions)
         return self
     }
+
+    /// Subscribes to the state stream and store the cancellable in the System.
+    /// The subscription will be canceled once the System is deinit.
+    @discardableResult
+    func run<SchedulerType: Scheduler>(subscribeOn scheduler: SchedulerType) -> Self {
+        self.stream.subscribe(on: scheduler).sink(receiveValue: { _ in }).store(in: &self.subscriptions)
+        return self
+    }
 }
 
 // MARK: modifiers
@@ -93,13 +90,8 @@ public extension System {
     /// - Parameter scheduler: the scheduler on which to execute the System
     /// - Returns: The newly scheduled System
     func execute<SchedulerType: Scheduler>(on scheduler: SchedulerType) -> Self {
-        self.scheduledStream = { events in
-            events
-                .subscribe(on: scheduler)
-                .receive(on: scheduler)
-                .eraseToAnyPublisher()
-        }
-
+        self.feedbacks = self.feedbacks.execute(on: scheduler)
+        self.transitions = self.transitions.execute(on: scheduler)
         return self
     }
 

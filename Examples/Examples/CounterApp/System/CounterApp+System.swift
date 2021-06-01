@@ -5,6 +5,7 @@
 //  Created by Thibault Wittemberg on 2021-01-12.
 //
 
+import Dispatch
 import Feedbacks
 
 // define a namespace for this app's system
@@ -55,5 +56,5 @@ extension CounterApp.System {
                 On(CounterApp.Events.Decrease.self, transitionTo: CounterApp.States.Decreasing(counter: state.counter.decrease(), isPaused: false))
             }
         }
-    }
+    }.execute(on: DispatchQueue(label: "Counter Queue"))
 }
