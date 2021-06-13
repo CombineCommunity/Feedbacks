@@ -14,10 +14,39 @@ private struct MockEvent: Event, Equatable { let value: Int }
 private struct AnotherMockEvent: Event {}
 
 final class FromTests: XCTestCase {
+    func testTransitionsForSelfInstantiatedState_has_values_when_state_is_instantiable() {
+        struct InstantiableState: State, Instantiable, Equatable {
+            let value: Int
+            static let instance = InstantiableState(value: 1701)
+        }
+
+        var receivedInstantiableState: InstantiableState?
+        let expectedInstantiableState = InstantiableState(value: 1701)
+
+        // Given: a transition from an Instantiable State
+        let sut = From(InstantiableState.self) { state in
+            receivedInstantiableState = state
+            return [On(MockEvent.self, transitionTo: MockState(value: 1701))]
+        }
+
+        // When: accessing the on the fly computed transitions for the instantiable state
+        // Then: the transitions are the ones described in the From statement
+        XCTAssertEqual(sut.transitionsForSelfInstantiatedState.count, 1)
+        XCTAssertEqual(sut.transitionsForSelfInstantiatedState[0].eventId, MockEvent.id)
+        XCTAssertEqual(sut.transitionsForSelfInstantiatedState[0].outputStateId, MockState.id)
+        // Then: the self instantiated state is used to compute the transitions
+        XCTAssertEqual(receivedInstantiableState, expectedInstantiableState)
+
+        // When: accessing the transitions for a specific state
+        let receivedTransitions = sut.transitionsForState(InstantiableState(value: Int.random(in: 0...10)))
+        // Then: the transition produced the expected state
+        XCTAssertEqual(receivedTransitions[0].transitionForEvent(MockEvent(value: Int.random(in: 0...10))) as? MockState, MockState(value: 1701))
+    }
+
     func testTransitionsForState_has_no_transitions_when_state_is_not_expectedType() {
         // Given: a From handling a MockState
         let sut = From(MockState.self) { _ in
-            On(AnyEvent.self) { _ in
+            On(AnyEvent.self, transitionTo: MockState.self) { _ in
                 return MockState(value: Int.random(in: 1...1_000_000))
             }
         }
@@ -26,14 +55,14 @@ final class FromTests: XCTestCase {
         let receivedOns = sut.transitionsForState(AnotherMockState(value: 1))
         
         // Then: no transitions are computed
-        XCTAssertEqual(sut.id, MockState.id)
+        XCTAssertEqual(sut.stateId, MockState.id)
         XCTAssertTrue(receivedOns.isEmpty)
     }
     
     func testTransitionsForState_has_no_transitions_when_state_is_not_expectedType_with_parameterLess_resultBuilder() {
         // Given: a From handling a MockState
         let sut = From(MockState.self) {
-            On(AnyEvent.self) { _ in
+            On(AnyEvent.self, transitionTo: MockState.self) { _ in
                 return MockState(value: Int.random(in: 1...1_000_000))
             }
         }
@@ -42,7 +71,7 @@ final class FromTests: XCTestCase {
         let receivedOns = sut.transitionsForState(AnotherMockState(value: 1))
         
         // Then: no transitions are computed
-        XCTAssertEqual(sut.id, MockState.id)
+        XCTAssertEqual(sut.stateId, MockState.id)
         XCTAssertTrue(receivedOns.isEmpty)
     }
     
@@ -57,7 +86,7 @@ final class FromTests: XCTestCase {
 
         // Given: a From handling a MockState
         let sut = From(MockState.self) { state in
-            On(MockEvent.self) { event in
+            On(MockEvent.self, transitionTo: MockState.self) { event in
                 receivedState = state
                 receivedEvent = event
                 return expectedNewState
@@ -68,9 +97,9 @@ final class FromTests: XCTestCase {
         let receivedOns = sut.transitionsForState(expectedState)
 
         // Then: the From has 1 On transition with the expected behavior
-        XCTAssertEqual(sut.id, MockState.id)
+        XCTAssertEqual(sut.stateId, MockState.id)
         XCTAssertEqual(receivedOns.count, 1)
-        XCTAssertEqual(receivedOns.first!.id, MockEvent.id)
+        XCTAssertEqual(receivedOns.first!.eventId, MockEvent.id)
         XCTAssertEqual(receivedOns.first!.transitionForEvent(expectedEvent) as? MockState, expectedNewState)
         XCTAssertEqual(receivedState, expectedState)
         XCTAssertEqual(receivedEvent, expectedEvent)
@@ -83,7 +112,7 @@ final class FromTests: XCTestCase {
 
         // Given: a From handling a MockState
         let sut = From(MockState.self) {
-            On(MockEvent.self) { _ in
+            On(MockEvent.self, transitionTo: MockState.self) { _ in
                 return expectedNewState
             }
         }
@@ -92,9 +121,9 @@ final class FromTests: XCTestCase {
         let receivedOns = sut.transitionsForState(expectedState)
 
         // Then: the From has 1 On transition with the expected behavior
-        XCTAssertEqual(sut.id, MockState.id)
+        XCTAssertEqual(sut.stateId, MockState.id)
         XCTAssertEqual(receivedOns.count, 1)
-        XCTAssertEqual(receivedOns.first!.id, MockEvent.id)
+        XCTAssertEqual(receivedOns.first!.eventId, MockEvent.id)
         XCTAssertEqual(receivedOns.first!.transitionForEvent(expectedEvent) as? MockState, expectedNewState)
     }
     
@@ -109,7 +138,7 @@ final class FromTests: XCTestCase {
 
         // Given: a From handling AnyState
         let sut = From(AnyState.self) { state in
-            On(MockEvent.self) { event in
+            On(MockEvent.self, transitionTo: MockState.self) { event in
                 receivedState = state
                 receivedEvent = event
                 return expectedNewState
@@ -120,9 +149,9 @@ final class FromTests: XCTestCase {
         let receivedOns = sut.transitionsForState(expectedState)
 
         // Then: the From has 1 On transition with the expected behavior
-        XCTAssertEqual(sut.id, AnyState.id)
+        XCTAssertEqual(sut.stateId, AnyState.id)
         XCTAssertEqual(receivedOns.count, 1)
-        XCTAssertEqual(receivedOns.first!.id, MockEvent.id)
+        XCTAssertEqual(receivedOns.first!.eventId, MockEvent.id)
         XCTAssertEqual(receivedOns.first!.transitionForEvent(expectedEvent) as? MockState, expectedNewState)
         XCTAssertEqual(receivedState as? AnotherMockState, expectedState)
         XCTAssertEqual(receivedEvent, expectedEvent)
@@ -135,7 +164,7 @@ final class FromTests: XCTestCase {
 
         // Given: a From handling AnyState
         let sut = From(AnyState.self) {
-            On(MockEvent.self) { event in
+            On(MockEvent.self, transitionTo: MockState.self) { event in
                 return expectedNewState
             }
         }
@@ -144,16 +173,16 @@ final class FromTests: XCTestCase {
         let receivedOns = sut.transitionsForState(expectedState)
 
         // Then: the From has 1 On transition with the expected behavior
-        XCTAssertEqual(sut.id, AnyState.id)
+        XCTAssertEqual(sut.stateId, AnyState.id)
         XCTAssertEqual(receivedOns.count, 1)
-        XCTAssertEqual(receivedOns.first!.id, MockEvent.id)
+        XCTAssertEqual(receivedOns.first!.eventId, MockEvent.id)
         XCTAssertEqual(receivedOns.first!.transitionForEvent(expectedEvent) as? MockState, expectedNewState)
     }
     
     func testComputeTransitionsForEvents_return_empty_when_state_is_not_expectedType() {
         // Given: a From handling a MockState
         let sut = From(MockState.self) { state in
-            On(AnyEvent.self) { event in
+            On(AnyEvent.self, transitionTo: MockState.self) { event in
                 return MockState(value: Int.random(in: 1...1_000_000))
             }
         }
@@ -170,7 +199,7 @@ final class FromTests: XCTestCase {
 
         // Given: a From handling a MockState
         let sut = From(MockState.self) { state in
-            On(MockEvent.self) { event in
+            On(MockEvent.self, transitionTo: MockState.self) { event in
                 return expectedNewState
             }
         }
@@ -238,7 +267,7 @@ final class FromTests: XCTestCase {
 
         // Given: a From disabled when condition is true
         let sut = From(MockState.self) { state in
-            On(MockEvent.self) { event in
+            On(MockEvent.self, transitionTo: MockState.self) { event in
                 return expectedNewState
             }
         }.disable {

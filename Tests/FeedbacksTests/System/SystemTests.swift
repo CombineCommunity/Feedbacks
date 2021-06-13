@@ -43,9 +43,7 @@ final class SystemTests: XCTestCase {
             
             Transitions {
                 From(AnyState.self) { _ in
-                    On(AnyEvent.self) { _ in
-                        MockStateB(value: 1)
-                    }
+                    On(AnyEvent.self, transitionTo: MockStateB(value: 1))
                 }
             }
         }.execute(on: DispatchQueue.immediateScheduler)
@@ -98,15 +96,15 @@ final class SystemTests: XCTestCase {
             
             Transitions {
                 From(MockStateA.self) { state in
-                    On(MockNextEvent.self) { _ in
-                        receivedTransitionsQueue.append(DispatchQueue.currentLabel)
+                    On(MockNextEvent.self, transitionTo: MockStateB.self) { _ in
+                    receivedTransitionsQueue.append(DispatchQueue.currentLabel)
                         return MockStateB(value: state.value)
                     }
                 }
                 
                 From(MockStateB.self) { state in
-                    On(MockNextEvent.self) { _ in
-                        receivedTransitionsQueue.append(DispatchQueue.currentLabel)
+                    On(MockNextEvent.self, transitionTo: MockStateA.self) { _ in
+                    receivedTransitionsQueue.append(DispatchQueue.currentLabel)
                         return MockStateA(value: state.value + 1)
                     }
                 }
@@ -158,14 +156,14 @@ final class SystemTests: XCTestCase {
             
             Transitions {
                 From(MockStateA.self) { state in
-                    On(MockNextEvent.self) { _ in
+                    On(MockNextEvent.self, transitionTo: MockStateB.self) { _ in
                         receivedSystemQueue.append(DispatchQueue.currentLabel)
                         return MockStateB(value: state.value)
                     }
                 }
                 
                 From(MockStateB.self) { state in
-                    On(MockNextEvent.self) { _ in
+                    On(MockNextEvent.self, transitionTo: MockStateA.self) { _ in
                         receivedSystemQueue.append(DispatchQueue.currentLabel)
                         return MockStateA(value: state.value + 1)
                     }
@@ -242,19 +240,19 @@ final class SystemTests: XCTestCase {
             
             Transitions {
                 From(MockStateA.self) { state in
-                    On(MockNextEvent.self) { _ in MockStateB(value: state.value) }
+                    On(MockNextEvent.self, transitionTo:  MockStateB(value: state.value))
                 }
                 
                 From(MockStateB.self) { state in
-                    On(MockNextEvent.self) { _ in MockStateC(value: state.value) }
+                    On(MockNextEvent.self, transitionTo: MockStateC(value: state.value))
                 }
                 
                 From(MockStateC.self) { state in
-                    On(MockNextEvent.self) { _ in MockStateD(value: state.value) }
+                    On(MockNextEvent.self, transitionTo: MockStateD(value: state.value))
                 }
                 
                 From(MockStateD.self) { state in
-                    On(MockNextEvent.self) { _ in MockStateA(value: state.value + 1) }
+                    On(MockNextEvent.self, transitionTo: MockStateA(value: state.value + 1))
                 }
             }
         }.execute(on: DispatchQueue(label: UUID().uuidString))
@@ -294,7 +292,7 @@ final class SystemTests: XCTestCase {
 
             Transitions {
                 From(MockStateA.self) { _ in
-                    On(MockNextEvent.self) { _ in MockStateB(value: 2) }
+                    On(MockNextEvent.self, transitionTo: MockStateB(value: 2))
                 }
             }
         }
@@ -373,7 +371,7 @@ final class SystemTests: XCTestCase {
             
             Transitions {
                 From(MockStateA.self) { _ in
-                    On(MockNextEvent.self) { _ in MockStateB(value: 2) }
+                    On(MockNextEvent.self, transitionTo: MockStateB(value: 2))
                 }
             }
         }
@@ -419,7 +417,7 @@ final class SystemTests: XCTestCase {
 
             Transitions {
                 From(MockStateA.self) { _ in
-                    On(MockNextEvent.self) { _ in MockStateB(value: 2) }
+                    On(MockNextEvent.self, transitionTo: MockStateB(value: 2))
                 }
             }
         }
@@ -464,7 +462,7 @@ final class SystemTests: XCTestCase {
             
             Transitions {
                 From(MockStateA.self) { _ in
-                    On(MockNextEvent.self) { _ in MockStateB(value: 2) }
+                    On(MockNextEvent.self, transitionTo: MockStateB(value: 2))
                 }
             }
         }
@@ -517,7 +515,7 @@ final class SystemTests: XCTestCase {
             
             Transitions {
                 From(MockStateA.self) { _ in
-                    On(MockNextEvent.self) { _ in MockStateB(value: 2) }
+                    On(MockNextEvent.self, transitionTo: MockStateB(value: 2))
                 }
             }
         }
@@ -571,7 +569,7 @@ final class SystemTests: XCTestCase {
 
             Transitions {
                 From(MockStateA.self) { _ in
-                    On(MockNextEvent.self) { _ in MockStateB(value: 2) }
+                    On(MockNextEvent.self, transitionTo: MockStateB(value: 2))
                 }
             }
         }

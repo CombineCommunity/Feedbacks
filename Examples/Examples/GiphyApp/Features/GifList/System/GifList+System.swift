@@ -36,10 +36,8 @@ extension GifList.System {
 
             Transitions {
                 From(GifList.States.Loading.self) {
-                    On(GifList.Events.LoadingIsComplete.self) { event in
-                        GifList.States.Loaded(gifs: event.gifs,
-                                              currentPage: event.currentPage,
-                                              totalPage: event.totalPage)
+                    On(GifList.Events.LoadingIsComplete.self, transitionTo: GifList.States.Loaded.self) { event in
+                        .init(gifs: event.gifs, currentPage: event.currentPage, totalPage: event.totalPage)
                     }
 
                     On(GifList.Events.LoadingHasFailed.self, transitionTo: GifList.States.Failed())
@@ -48,14 +46,14 @@ extension GifList.System {
                 From(GifList.States.Loaded.self) { state in
                     On(GifList.Events.Refresh.self, transitionTo: GifList.States.Loading(page: state.currentPage))
 
-                    On(GifList.Events.LoadPrevious.self) {
+                    On(GifList.Events.LoadPrevious.self, transitionTo: GifList.States.Loading.self) {
                         let previousPage = state.currentPage - 1
-                        return GifList.States.Loading(page: previousPage > 0 ? previousPage : 0)
+                        return .init(page: previousPage > 0 ? previousPage : 0)
                     }
 
-                    On(GifList.Events.LoadNext.self) {
+                    On(GifList.Events.LoadNext.self, transitionTo: GifList.States.Loading.self) {
                         let nextPage = state.currentPage + 1
-                        return GifList.States.Loading(page: nextPage < state.totalPage ? nextPage : state.totalPage)
+                        return .init(page: nextPage < state.totalPage ? nextPage : state.totalPage)
                     }
                 }
 

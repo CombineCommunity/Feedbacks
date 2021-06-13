@@ -16,8 +16,8 @@ import Foundation
 /// can be added when new features are to be handled by the System. Feedbacks aim to induce a State
 /// mutation based on a previous value of the State, eventually executing some side effects.
 public class System {
-    let initialState: InitialState
-    var feedbacks: Feedbacks
+    public let initialState: InitialState
+    public internal(set) var feedbacks: Feedbacks
     public private(set) var transitions: Transitions
 
     private var subscriptions = [AnyCancellable]()

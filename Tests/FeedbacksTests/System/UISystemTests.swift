@@ -30,7 +30,7 @@ final class UISystemTests: XCTestCase {
 
             Transitions {
                 From(MockState.self) { _ in
-                    On(MockEvent.self) { _ in MockState(value: 10) }
+                    On(MockEvent.self, transitionTo: MockState.self) { _ in MockState(value: 10) }
                 }
             }
         }
@@ -107,7 +107,7 @@ final class UISystemTests: XCTestCase {
 
             Transitions {
                 From(MockState.self) { _ in
-                    On(MockEvent.self) { _ in mutatedState }
+                    On(MockEvent.self, transitionTo: MockState.self) { _ in mutatedState }
                 }
             }
         }
@@ -137,7 +137,7 @@ final class UISystemTests: XCTestCase {
 
             Transitions {
                 From(MockState.self) { _ in
-                    On(MockEvent.self) { _ in MockState(value: 10) }
+                    On(MockEvent.self, transitionTo: MockState(value: 10))
                 }
             }
         }
@@ -152,6 +152,38 @@ final class UISystemTests: XCTestCase {
         XCTAssertEqual(uiSystem.transitions.reducer(MockState(value: 1), MockEvent(value: 1)) as? MockState,
                        sut.transitions.reducer(MockState(value: 1), MockEvent(value: 1)) as? MockState)
 
+    }
+
+    func testUISystem_executes_viewStateFactory_on_default_queue() {
+        let exp = expectation(description: "execute viewStateFactory on the default queue")
+
+        var receivedQueue: String?
+
+        // Given: a UISystem
+        let sut = UISystem(viewStateFactory: { _ -> MockViewState in
+                            receivedQueue = DispatchQueue.currentLabel
+                            return MockViewState(value: Int.random(in: 0...1_000_000)) }) {
+            InitialState {
+                MockState(value: Int.random(in: 0...1_000_000))
+            }
+            Feedbacks { }
+
+            Transitions {
+                From(MockState.self) { _ in
+                    On(MockEvent.self, transitionTo: MockState(value: 10))
+                }
+            }
+        }
+
+        // When: running the system
+        let cancellable = sut.stream.output(in: 0...1).sink(receiveValue: { _ in exp.fulfill() })
+
+        waitForExpectations(timeout: 0.5)
+
+        // Then: the ViewState computation is done on a default "Feedbacks.UISystem" queue
+        XCTAssert(receivedQueue!.starts(with: "Feedbacks.UISystem."))
+
+        cancellable.cancel()
     }
 
     func testMakePublishingFeedback_execute_viewStateFactory_on_expected_queue() {
@@ -303,7 +335,7 @@ final class UISystemTests: XCTestCase {
 
             Transitions {
                 From(MockState.self) { _ in
-                    On(MockEvent.self) { _ in mutatedState }
+                    On(MockEvent.self, transitionTo: mutatedState)
                 }
             }
         }
@@ -367,7 +399,7 @@ final class UISystemTests: XCTestCase {
             Feedbacks {}
             Transitions {
                 From(MockState.self) { _ in
-                    On(MockEvent.self) { _ in MockState(value: 1) }
+                    On(MockEvent.self, transitionTo: MockState(value: 1))
                 }
             }
         }

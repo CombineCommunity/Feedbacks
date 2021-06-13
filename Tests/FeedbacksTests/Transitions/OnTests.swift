@@ -21,7 +21,7 @@ final class OnTests: XCTestCase {
         let expectedState = MockState(value: Int.random(in: 1...1_000_000))
 
         // Given: an On that expect a MockEvent type and return an expected state
-        let sut = On(MockEvent.self) { event in
+        let sut = On(MockEvent.self, transitionTo: MockState.self) { event in
             receivedEvent = event
             return expectedState
         }
@@ -42,7 +42,7 @@ final class OnTests: XCTestCase {
         let expectedState = MockState(value: Int.random(in: 1...1_000_000))
 
         // Given: an On that expect a MockEvent type and return an expected state
-        let sut = On(MockEvent.self) {
+        let sut = On(MockEvent.self, transitionTo: MockState.self) {
             return expectedState
         }
 
@@ -59,7 +59,7 @@ final class OnTests: XCTestCase {
         let expectedState = MockState(value: Int.random(in: 1...1_000_000))
 
         // Given: an On that expect a MockEvent type and return an expected state
-        let sut = On(MockEvent.self) {
+        let sut = On(MockEvent.self, transitionTo: MockState.self) {
             return expectedState
         }
 
@@ -88,7 +88,7 @@ final class OnTests: XCTestCase {
         let expectedState = MockState(value: Int.random(in: 1...1_000_000))
 
         // Given: an On that expect a MockEvent type and return an expected state
-        let sut = On(MockEvent.self) { event in
+        let sut = On(MockEvent.self, transitionTo: MockState.self) { event in
             expectedState
         }
 
@@ -115,7 +115,7 @@ final class OnTests: XCTestCase {
         let expectedState = MockState(value: Int.random(in: 1...1_000_000))
 
         // Given: an On reacting to any event
-        let sut = On(AnyEvent.self) { event in
+        let sut = On(AnyEvent.self, transitionTo: MockState.self) { event in
             receivedEvent = event
             return expectedState
         }
@@ -135,7 +135,7 @@ final class OnTests: XCTestCase {
         let expectedState = MockState(value: Int.random(in: 1...1_000_000))
 
         // Given: an On reacting to any event
-        let sut = On(AnyEvent.self) {
+        let sut = On(AnyEvent.self, transitionTo: MockState.self) {
             return expectedState
         }
 
@@ -165,7 +165,7 @@ final class OnTests: XCTestCase {
         var condition = true
 
         // Given: an On that is disabled depending on the "condition" value
-        let sut = On(MockEvent.self) { event in
+        let sut = On(MockEvent.self, transitionTo: MockState.self) { event in
             expectedState
         }.disable {
             condition == true

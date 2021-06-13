@@ -39,8 +39,8 @@ public extension UISystem {
     ///   - get: the function to read the RawState value
     ///   - event: the Event to emit when the binding is mutated
     /// - Returns: the binding on the ViewState
-    func binding<Output>(get: @escaping (PublishedState) -> Output, emit event: Event) -> Binding<Output> {
-        self.binding(get: get, emit: { _ in event })
+    func binding<Output>(get: @escaping (PublishedState) -> Output, emit eventId: Event) -> Binding<Output> {
+        self.binding(get: get, emit: { _ in eventId })
     }
 }
 
@@ -63,8 +63,8 @@ public extension UISystem where PublishedState: ViewState {
     ///   - keyPath: the path to the View State's property to expose as a Binding
     ///   - event: the Event to emit when the binding is mutated
     /// - Returns: the binding on the published ViewState
-    func binding<Output>(keyPath: KeyPath<PublishedState, Output>, emit event: Event) -> Binding<Output> {
-        self.binding(keyPath: keyPath, emit: { _ in event })
+    func binding<Output>(keyPath: KeyPath<PublishedState, Output>, emit eventId: Event) -> Binding<Output> {
+        self.binding(keyPath: keyPath, emit: { _ in eventId })
     }
 
     /// Provides a read-only binding on the System's published ViewState

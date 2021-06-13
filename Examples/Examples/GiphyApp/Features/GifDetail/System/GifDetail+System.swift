@@ -43,8 +43,8 @@ extension GifDetail.System {
 
             Transitions {
                 From(GifDetail.States.Loading.self) {
-                    On(GifDetail.Events.LoadingIsComplete.self) { event in
-                        GifDetail.States.Loaded(gif: event.gif, isFavorite: event.isFavorite)
+                    On(GifDetail.Events.LoadingIsComplete.self, transitionTo: GifDetail.States.Loaded.self) { event in
+                        .init(gif: event.gif, isFavorite: event.isFavorite)
                     }
 
                     On(GifDetail.Events.LoadingHasFailed.self, transitionTo: GifDetail.States.Failed())
@@ -55,8 +55,8 @@ extension GifDetail.System {
                 }
 
                 From(GifDetail.States.TogglingFavorite.self) {
-                    On(GifDetail.Events.LoadingIsComplete.self) { event in
-                        GifDetail.States.Loaded(gif: event.gif, isFavorite: event.isFavorite)
+                    On(GifDetail.Events.LoadingIsComplete.self, transitionTo: GifDetail.States.Loaded.self) { event in
+                        .init(gif: event.gif, isFavorite: event.isFavorite)
                     }
                     On(GifDetail.Events.LoadingHasFailed.self, transitionTo: GifDetail.States.Failed())
                 }
