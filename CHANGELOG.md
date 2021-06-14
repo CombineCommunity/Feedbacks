@@ -1,6 +1,7 @@
 **v0.5.0 - Maul**:
 
 - Transitions: enforce the deterministic output state for `On` transitions
+- System: improve the error message (at compile time) when omitting the initial state in the System declaration
 
 **v0.4.0 - Bane**:
 
