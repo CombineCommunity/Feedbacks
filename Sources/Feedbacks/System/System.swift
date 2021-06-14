@@ -260,4 +260,20 @@ public struct SystemBuilder {
             transitions
         }
     }
+
+    @available(*, unavailable, message: "You cannot create a System without an initial state")
+    public static func buildBlock(
+        _ feedbacks: Feedbacks,
+        _ transitions: Transitions
+    ) -> (InitialState, Feedbacks, Transitions) {
+        fatalError()
+    }
+
+    @available(*, unavailable, message: "You cannot create a System without an initial state")
+    public static func buildBlock(
+        _ feedbacks: Feedbacks,
+        _ transitions: Transitions
+    ) -> System {
+        fatalError()
+    }
 }
